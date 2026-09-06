@@ -202,6 +202,27 @@ class Dyplink {
     }
   }
 
+  /// Publishes [link] on the [deepLinks] stream, but only if that stream has
+  /// already been opened. Returns whether the event was actually published.
+  ///
+  /// Deliberately does *not* create the controller the way the [deepLinks]
+  /// getter does: creating it here would attach the native deep-link listener
+  /// as a side effect of an unrelated call. So this is best-effort by design
+  /// — a caller that must not lose the link needs its own delivery path.
+  ///
+  /// Unlike [deepLinks] this never throws, on any platform.
+  ///
+  /// Not part of the package's curated public API (see `lib/dyplink.dart`),
+  /// but left public within the library so other modules — e.g. `DyplinkPush`
+  /// routing the destination of a tapped push notification — can feed the
+  /// stream apps already listen to.
+  bool emitDeepLink(DeepLinkResult link) {
+    final controller = _deepLinkController;
+    if (controller == null || controller.isClosed) return false;
+    controller.add(link);
+    return true;
+  }
+
   // ── Platform support ────────────────────────────────────────────────────
 
   /// Whether the current platform is supported. Returns false on iOS, web,

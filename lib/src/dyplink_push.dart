@@ -6,12 +6,18 @@ import 'package:flutter/services.dart';
 
 import 'dyplink_core.dart';
 import 'dyplink_error.dart';
+import 'dyplink_models.dart';
 import 'pigeon.g.dart' as pg;
 
 /// Data-payload key that Dyplink stamps onto outgoing FCM messages for a
 /// campaign push. Its absence means the notification did not originate
 /// from a Dyplink campaign, so engagement reporting is skipped.
 const String _campaignIdDataKey = 'dyplink_campaign_id';
+
+/// Data-payload keys that may carry a campaign push's destination URL, in
+/// precedence order. Matches the Android SDK's `PushNotificationHandler`,
+/// which reads `deep_link_url` and falls back to `link`.
+const List<String> _deepLinkDataKeys = <String>['deep_link_url', 'link'];
 
 /// Optional push notification module for the Dyplink SDK.
 ///
@@ -38,9 +44,11 @@ const String _campaignIdDataKey = 'dyplink_campaign_id';
 /// FirebaseMessaging.onMessage.listen(
 ///   (message) => DyplinkPush.instance.reportNotificationReceived(message.data),
 /// );
-/// FirebaseMessaging.onMessageOpenedApp.listen(
-///   (message) => DyplinkPush.instance.reportNotificationClicked(message.data),
-/// );
+/// FirebaseMessaging.onMessageOpenedApp.listen((message) async {
+///   // A tap also hands back the campaign's destination URL, if it has one.
+///   final url = await DyplinkPush.instance.reportNotificationClicked(message.data);
+///   if (url != null) router.go(url);
+/// });
 /// ```
 class DyplinkPush {
   DyplinkPush._();
@@ -178,22 +186,80 @@ class DyplinkPush {
   Future<void> reportNotificationReceived(Map<String, dynamic> data) =>
       _reportEvent(data, 'delivered');
 
-  /// Reports that the user tapped a Dyplink push notification.
+  /// Reports that the user tapped a Dyplink push notification, and returns
+  /// the campaign's destination URL so the app can route to it.
   ///
   /// Call this from `firebase_messaging`'s `FirebaseMessaging.onMessageOpenedApp`
   /// listener, or after `FirebaseMessaging.instance.getInitialMessage()`
-  /// resolves to a non-null message on cold start, passing `message.data`.
+  /// resolves to a non-null message on cold start, passing `message.data`:
+  /// ```dart
+  /// final url = await DyplinkPush.instance.reportNotificationClicked(message.data);
+  /// if (url != null) router.go(url);
+  /// ```
+  ///
+  /// Returns the URL taken from the payload's `deep_link_url` key, falling
+  /// back to `link` — the same precedence the Android SDK uses. Returns null
+  /// when the campaign carried no destination, when either key holds
+  /// something other than a non-empty string, or when [data] is not a Dyplink
+  /// campaign push at all.
+  ///
+  /// The URL is *also* emitted on [Dyplink.deepLinks], so apps already
+  /// listening there handle push taps through the same channel as every other
+  /// link. That path is best-effort only: on cold start the click is
+  /// typically reported before the widget tree is up, so nothing is
+  /// subscribed yet and the event goes nowhere. The returned value is the
+  /// reliable channel — prefer it, and treat the stream as a convenience.
   ///
   /// Same no-op-if-not-a-campaign and never-throws semantics as
-  /// [reportNotificationReceived].
-  Future<void> reportNotificationClicked(Map<String, dynamic> data) =>
-      _reportEvent(data, 'click');
+  /// [reportNotificationReceived]. Extracting the URL is independent of
+  /// reporting it, so a failed analytics call still yields the destination.
+  Future<String?> reportNotificationClicked(Map<String, dynamic> data) async {
+    if (_campaignIdFrom(data) == null) return null;
+
+    final deepLinkUrl = _deepLinkFrom(data);
+    if (deepLinkUrl != null) {
+      // Ahead of the report, so a slow POST can never delay routing. No-ops
+      // unless the app has already opened the deep-link stream.
+      Dyplink.instance.emitDeepLink(
+        DeepLinkResult(url: deepLinkUrl, isDeferred: false),
+      );
+    }
+
+    try {
+      await _reportEvent(data, 'click');
+    } catch (_) {
+      // Belt-and-braces: _reportEvent already swallows its own failures, but
+      // analytics must never cost the caller the URL — the user still has to
+      // reach the destination.
+    }
+    return deepLinkUrl;
+  }
+
+  /// The Dyplink campaign ID in [data], or null if this is not a campaign
+  /// push (key absent, or present but blank).
+  String? _campaignIdFrom(Map<String, dynamic> data) {
+    final rawCampaignId = data[_campaignIdDataKey];
+    if (rawCampaignId == null) return null;
+    final campaignId = rawCampaignId.toString();
+    return campaignId.isEmpty ? null : campaignId;
+  }
+
+  /// The destination URL in [data], or null if the push carried none.
+  ///
+  /// [data] comes straight off the platform channel and may hold anything, so
+  /// a value that is not a non-empty [String] is treated as absent and the
+  /// next key in [_deepLinkDataKeys] is tried.
+  String? _deepLinkFrom(Map<String, dynamic> data) {
+    for (final key in _deepLinkDataKeys) {
+      final value = data[key];
+      if (value is String && value.isNotEmpty) return value;
+    }
+    return null;
+  }
 
   Future<void> _reportEvent(Map<String, dynamic> data, String type) async {
-    final rawCampaignId = data[_campaignIdDataKey];
-    if (rawCampaignId == null) return;
-    final campaignId = rawCampaignId.toString();
-    if (campaignId.isEmpty) return;
+    final campaignId = _campaignIdFrom(data);
+    if (campaignId == null) return;
 
     final config = Dyplink.instance.currentConfig;
     if (config == null) return;
