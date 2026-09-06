@@ -27,6 +27,16 @@ class Dyplink {
   // ignore: public_member_api_docs
   pg.DyplinkHostApi hostApi = pg.DyplinkHostApi();
 
+  /// The configuration most recently applied via [init], or null if [init]
+  /// has not yet succeeded.
+  ///
+  /// Not part of the package's curated public API (see `lib/dyplink.dart`),
+  /// but left public within the library so other modules — e.g.
+  /// `DyplinkPush` push-event reporting — can reach baseUrl/apiKey/projectId
+  /// without the host app having to supply them a second time.
+  // ignore: public_member_api_docs
+  DyplinkConfig? currentConfig;
+
   // Deep link stream state. We own a broadcast StreamController so multiple
   // subscribers share a single native listener, and we wire start/stop of
   // the native listener to the first-listen / last-cancel edges.
@@ -61,7 +71,10 @@ class Dyplink {
   /// missing required fields.
   Future<void> init(DyplinkConfig config) {
     _ensureSupported();
-    return runCatchingDyplink(() => hostApi.initialize(config.toDto()));
+    return runCatchingDyplink(() async {
+      await hostApi.initialize(config.toDto());
+      currentConfig = config;
+    });
   }
 
   /// Identify the current user with the given parameters.
