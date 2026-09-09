@@ -19,6 +19,10 @@ const String _campaignIdDataKey = 'dyplink_campaign_id';
 /// which reads `deep_link_url` and falls back to `link`.
 const List<String> _deepLinkDataKeys = <String>['deep_link_url', 'link'];
 
+/// Keys carrying content no push provider renders itself.
+const String _carouselDataKey = 'dyplink_carousel';
+const String _timerDataKey = 'dyplink_timer';
+
 /// Optional push notification module for the Dyplink SDK.
 ///
 /// Call [init] after [Dyplink.init] to enable automatic FCM push token
@@ -213,6 +217,44 @@ class DyplinkPush {
   /// Same no-op-if-not-a-campaign and never-throws semantics as
   /// [reportNotificationReceived]. Extracting the URL is independent of
   /// reporting it, so a failed analytics call still yields the destination.
+  /// One frame of a campaign's carousel.
+  ///
+  /// Returned rather than rendered: Flutter has no notification UI of its own,
+  /// and the native SDKs draw the notification before Dart is running. An app
+  /// that wants to show these has to build the screen itself, which is why
+  /// they are surfaced as data.
+  static List<PushCarouselSlide> carouselFrom(Map<String, dynamic> data) {
+    final raw = data[_carouselDataKey];
+    if (raw is! String || raw.isEmpty) return const <PushCarouselSlide>[];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const <PushCarouselSlide>[];
+      return decoded
+          .whereType<Map<Object?, Object?>>()
+          .map(PushCarouselSlide.fromMap)
+          // A slide with no image is a blank frame, so it is dropped rather
+          // than shown empty.
+          .where((slide) => slide.imageUrl.isNotEmpty)
+          .toList(growable: false);
+    } on FormatException {
+      // Malformed content costs the extras, never the notification.
+      return const <PushCarouselSlide>[];
+    }
+  }
+
+  /// A campaign's countdown, or null when it carries none or an unusable one.
+  static PushTimer? timerFrom(Map<String, dynamic> data) {
+    final raw = data[_timerDataKey];
+    if (raw is! String || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map) return null;
+      return PushTimer.fromMap(decoded.cast<Object?, Object?>());
+    } on FormatException {
+      return null;
+    }
+  }
+
   Future<String?> reportNotificationClicked(Map<String, dynamic> data) async {
     if (_campaignIdFrom(data) == null) return null;
 

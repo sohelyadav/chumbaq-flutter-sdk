@@ -42,7 +42,9 @@ export 'src/dyplink_models.dart'
         MessageEvent,
         MessageLifecycleEvent,
         MessageButtonAction,
-        MessageCustomEvent;
+        MessageCustomEvent,
+        PushCarouselSlide,
+        PushTimer;
 
 // Typed error hierarchy.
 export 'src/dyplink_error.dart'

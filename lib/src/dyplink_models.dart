@@ -748,3 +748,70 @@ Map<String, Object?>? _coerceNestedMap(Object? input) {
   if (input is! Map) return null;
   return _coerceMap(input.cast<Object?, Object?>());
 }
+
+/// One frame of a push campaign's carousel.
+///
+/// No push provider carries a carousel, so the server sends the slides as data
+/// and the client renders them. A build that ignores them shows an ordinary
+/// notification — never nothing.
+class PushCarouselSlide {
+  const PushCarouselSlide({
+    required this.imageUrl,
+    this.caption,
+    this.deepLinkUrl,
+  });
+
+  final String imageUrl;
+  final String? caption;
+
+  /// Where this slide leads. Null means the campaign's own deep link, so a
+  /// carousel telling one story needs only that one.
+  final String? deepLinkUrl;
+
+  /// Built from a decoded payload entry, which crosses a platform channel and
+  /// may hold anything — a value of the wrong type is treated as absent rather
+  /// than throwing part-way through building a list.
+  factory PushCarouselSlide.fromMap(Map<Object?, Object?> map) {
+    String? optional(Object? value) =>
+        value is String && value.isNotEmpty ? value : null;
+
+    return PushCarouselSlide(
+      imageUrl: optional(map['imageUrl']) ?? '',
+      caption: optional(map['caption']),
+      deepLinkUrl: optional(map['deepLinkUrl']),
+    );
+  }
+}
+
+/// A countdown carried by a push campaign, rendered by the client.
+class PushTimer {
+  const PushTimer({required this.endsAt, this.expiredTitle, this.expiredBody});
+
+  final DateTime endsAt;
+
+  /// Copy to show once the countdown has passed. Null means the campaign's own.
+  final String? expiredTitle;
+  final String? expiredBody;
+
+  /// Whether the countdown has already run out, which is ordinary rather than
+  /// exceptional: a notification can sit undelivered longer than it lasts.
+  bool get hasExpired => DateTime.now().isAfter(endsAt);
+
+  /// Returns null when `endsAt` is missing or unparseable — a countdown to an
+  /// unknown moment is worse than none.
+  static PushTimer? fromMap(Map<Object?, Object?> map) {
+    final rawEndsAt = map['endsAt'];
+    if (rawEndsAt is! String) return null;
+    final endsAt = DateTime.tryParse(rawEndsAt);
+    if (endsAt == null) return null;
+
+    String? optional(Object? value) =>
+        value is String && value.isNotEmpty ? value : null;
+
+    return PushTimer(
+      endsAt: endsAt,
+      expiredTitle: optional(map['expiredTitle']),
+      expiredBody: optional(map['expiredBody']),
+    );
+  }
+}
