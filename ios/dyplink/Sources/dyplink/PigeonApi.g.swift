@@ -1051,11 +1051,29 @@ protocol DyplinkPushHostApi {
   /// Named `initialize` (not `init`) — see [DyplinkHostApi.initialize] for why.
   func initialize() throws
   /// `DyplinkPush.isInitialized`.
-  func isInitialized() throws -> Bool
+  ///
+  /// Named `isPushInitialized`, not `isInitialized`, because the native
+  /// plugin classes implement every HostApi in this file on a single object.
+  /// Pigeon turns each HostApi into an interface/protocol, so two of them
+  /// declaring `isInitialized(): Bool` collapse to one implementation —
+  /// whichever the class writes answers both channels, and the push
+  /// module's own state becomes unreachable. Unlike [DyplinkHostApi.initialize]
+  /// vs [initialize], the signatures here are identical, so there is nothing
+  /// for overload resolution to tell apart. The Dart facade still exposes
+  /// this as `DyplinkPush.isInitialized`.
+  func isPushInitialized() throws -> Bool
   /// `DyplinkPush.isRegistered`.
   func isRegistered() throws -> Bool
   /// Forwards to suspend `DyplinkPush.registerToken(token)`.
   func registerToken(token: String, completion: @escaping (Result<Void, Error>) -> Void)
+  /// Forwards to suspend `DyplinkPush.registerMiPushToken(regId)`.
+  ///
+  /// A vendor channel alongside FCM rather than a replacement for it: MIUI
+  /// throttles background FCM, so on Xiaomi devices this is the one that gets
+  /// delivered. The host app owns the Mi Push SDK and passes the regId it
+  /// receives; see the native SDK's `DyplinkPush.registerMiPushToken` for the
+  /// full contract.
+  func registerMiPushToken(regId: String, completion: @escaping (Result<Void, Error>) -> Void)
   /// Forwards to suspend `DyplinkPush.unregisterToken()`.
   func unregisterToken(completion: @escaping (Result<Void, Error>) -> Void)
   func startTokenStream() throws
@@ -1084,18 +1102,28 @@ class DyplinkPushHostApiSetup {
       initializeChannel.setMessageHandler(nil)
     }
     /// `DyplinkPush.isInitialized`.
-    let isInitializedChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isInitialized\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    ///
+    /// Named `isPushInitialized`, not `isInitialized`, because the native
+    /// plugin classes implement every HostApi in this file on a single object.
+    /// Pigeon turns each HostApi into an interface/protocol, so two of them
+    /// declaring `isInitialized(): Bool` collapse to one implementation —
+    /// whichever the class writes answers both channels, and the push
+    /// module's own state becomes unreachable. Unlike [DyplinkHostApi.initialize]
+    /// vs [initialize], the signatures here are identical, so there is nothing
+    /// for overload resolution to tell apart. The Dart facade still exposes
+    /// this as `DyplinkPush.isInitialized`.
+    let isPushInitializedChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isPushInitialized\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
-      isInitializedChannel.setMessageHandler { _, reply in
+      isPushInitializedChannel.setMessageHandler { _, reply in
         do {
-          let result = try api.isInitialized()
+          let result = try api.isPushInitialized()
           reply(wrapResult(result))
         } catch {
           reply(wrapError(error))
         }
       }
     } else {
-      isInitializedChannel.setMessageHandler(nil)
+      isPushInitializedChannel.setMessageHandler(nil)
     }
     /// `DyplinkPush.isRegistered`.
     let isRegisteredChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isRegistered\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
@@ -1128,6 +1156,30 @@ class DyplinkPushHostApiSetup {
       }
     } else {
       registerTokenChannel.setMessageHandler(nil)
+    }
+    /// Forwards to suspend `DyplinkPush.registerMiPushToken(regId)`.
+    ///
+    /// A vendor channel alongside FCM rather than a replacement for it: MIUI
+    /// throttles background FCM, so on Xiaomi devices this is the one that gets
+    /// delivered. The host app owns the Mi Push SDK and passes the regId it
+    /// receives; see the native SDK's `DyplinkPush.registerMiPushToken` for the
+    /// full contract.
+    let registerMiPushTokenChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.dyplink.DyplinkPushHostApi.registerMiPushToken\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      registerMiPushTokenChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let regIdArg = args[0] as! String
+        api.registerMiPushToken(regId: regIdArg) { result in
+          switch result {
+          case .success:
+            reply(wrapResult(nil))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      registerMiPushTokenChannel.setMessageHandler(nil)
     }
     /// Forwards to suspend `DyplinkPush.unregisterToken()`.
     let unregisterTokenChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.dyplink.DyplinkPushHostApi.unregisterToken\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)

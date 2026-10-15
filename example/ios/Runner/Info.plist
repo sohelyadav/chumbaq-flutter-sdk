@@ -22,10 +22,33 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.dyplink.dyplinkExample.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Must match DyplinkConfig.customScheme in lib/main.dart.
+				     Without this iOS never delivers dyplinkexample:// URLs to
+				     the app, so the plugin has nothing to parse. -->
+				<string>dyplinkexample</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Lets the example talk to a Dyplink API running on http://localhost
+		     during development. Only localhost and .local are exempted. -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

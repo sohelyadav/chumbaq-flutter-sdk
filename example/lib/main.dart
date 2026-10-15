@@ -21,6 +21,19 @@ void main() {
   runApp(const DyplinkExampleApp());
 }
 
+const String _baseUrl = String.fromEnvironment(
+  'DYPLINK_BASE_URL',
+  defaultValue: 'https://api.dyplink.com',
+);
+const String _apiKey = String.fromEnvironment(
+  'DYPLINK_API_KEY',
+  defaultValue: 'YOUR_API_KEY',
+);
+const String _projectId = String.fromEnvironment(
+  'DYPLINK_PROJECT_ID',
+  defaultValue: 'YOUR_PROJECT_ID',
+);
+
 class DyplinkExampleApp extends StatelessWidget {
   const DyplinkExampleApp({super.key});
 
@@ -72,16 +85,23 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _initDyplink() async {
-    if (!Platform.isAndroid) {
-      _log('iOS support is not yet available — Dyplink stubs all calls.');
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      _log('Dyplink has a native bridge for Android and iOS only.');
       return;
     }
 
-    // Replace with your real credentials from the Dyplink dashboard.
+    // Replace with your real credentials from the Dyplink dashboard, or pass
+    // them at launch so nothing has to be edited in (or committed to) this
+    // file:
+    //
+    //   flutter run \
+    //     --dart-define=DYPLINK_BASE_URL=http://localhost:3010 \
+    //     --dart-define=DYPLINK_API_KEY=... \
+    //     --dart-define=DYPLINK_PROJECT_ID=...
     final config = DyplinkConfig.builder(
-      baseUrl: 'https://api.dyplink.com',
-      apiKey: 'YOUR_API_KEY',
-      projectId: 'YOUR_PROJECT_ID',
+      baseUrl: _baseUrl,
+      apiKey: _apiKey,
+      projectId: _projectId,
     )
         .logLevel(DyplinkLogLevel.debug)
         .flushInterval(const Duration(seconds: 30))
@@ -152,6 +172,24 @@ class _HomeScreenState extends State<HomeScreen>
     _log('tracked revenue: 9.99 USD');
   }
 
+  Future<void> _checkMessages() async {
+    try {
+      await DyplinkMessages.instance.onScreenView('HomeScreen');
+      _log('messages: asked for on_screen "HomeScreen"');
+    } on DyplinkError catch (e) {
+      _log('messages check failed: $e');
+    }
+  }
+
+  Future<void> _loadBanners() async {
+    try {
+      final category = await DyplinkBanners.instance.loadBanners('home-top');
+      _log('banners: ${category.banners.length} in "${category.name}"');
+    } on DyplinkError catch (e) {
+      _log('banners failed: $e');
+    }
+  }
+
   Future<void> _resetIdentity() async {
     await Dyplink.instance.reset();
     _log('identity reset');
@@ -195,6 +233,8 @@ class _HomeScreenState extends State<HomeScreen>
                 FilledButton(onPressed: _identify, child: const Text('Identify')),
                 FilledButton(onPressed: _trackEvent, child: const Text('Track event')),
                 FilledButton(onPressed: _trackRevenue, child: const Text('Track revenue')),
+                FilledButton(onPressed: _checkMessages, child: const Text('Check messages')),
+                FilledButton(onPressed: _loadBanners, child: const Text('Load banners')),
                 FilledButton(onPressed: _flushNow, child: const Text('Flush')),
                 FilledButton(onPressed: _resetIdentity, child: const Text('Reset')),
               ],
