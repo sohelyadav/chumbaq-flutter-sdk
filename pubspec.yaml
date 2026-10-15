@@ -1,7 +1,9 @@
 name: dyplink
 description: "Dyplink Flutter SDK — deep linking, attribution, events, push, banners, and in-app messages"
 version: 0.0.1
-homepage:
+homepage: https://github.com/sohelyadav/dyplink-flutter-sdk
+repository: https://github.com/sohelyadav/dyplink-flutter-sdk
+issue_tracker: https://github.com/sohelyadav/dyplink-flutter-sdk/issues
 
 environment:
   sdk: ^3.11.1

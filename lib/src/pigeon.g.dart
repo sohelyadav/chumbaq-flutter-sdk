@@ -1218,8 +1218,18 @@ class DyplinkPushHostApi {
   }
 
   /// `DyplinkPush.isInitialized`.
-  Future<bool> isInitialized() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isInitialized$pigeonVar_messageChannelSuffix';
+  ///
+  /// Named `isPushInitialized`, not `isInitialized`, because the native
+  /// plugin classes implement every HostApi in this file on a single object.
+  /// Pigeon turns each HostApi into an interface/protocol, so two of them
+  /// declaring `isInitialized(): Bool` collapse to one implementation —
+  /// whichever the class writes answers both channels, and the push
+  /// module's own state becomes unreachable. Unlike [DyplinkHostApi.initialize]
+  /// vs [initialize], the signatures here are identical, so there is nothing
+  /// for overload resolution to tell apart. The Dart facade still exposes
+  /// this as `DyplinkPush.isInitialized`.
+  Future<bool> isPushInitialized() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isPushInitialized$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1283,6 +1293,35 @@ class DyplinkPushHostApi {
     );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[token]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Forwards to suspend `DyplinkPush.registerMiPushToken(regId)`.
+  ///
+  /// A vendor channel alongside FCM rather than a replacement for it: MIUI
+  /// throttles background FCM, so on Xiaomi devices this is the one that gets
+  /// delivered. The host app owns the Mi Push SDK and passes the regId it
+  /// receives; see the native SDK's `DyplinkPush.registerMiPushToken` for the
+  /// full contract.
+  Future<void> registerMiPushToken(String regId) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.registerMiPushToken$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[regId]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {

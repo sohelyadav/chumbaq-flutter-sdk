@@ -799,7 +799,10 @@ class PushAction {
     this.deepLinkUrl,
   });
 
-  /// Reported back with a click, so a tap can be told from a button.
+  /// Pass this to [DyplinkPush.reportNotificationClicked] as its `actionId`
+  /// when the user presses this button, and the campaign's report can tell
+  /// the press apart from a tap on the notification body. Nothing reports it
+  /// for you — Flutter is not what drew the button.
   final String id;
 
   final String title;

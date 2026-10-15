@@ -5,15 +5,21 @@
 // Flutter <-> native boundary. Do NOT edit the generated files:
 //   - lib/src/pigeon.g.dart
 //   - android/src/main/kotlin/com/dyplink/dyplink/PigeonApi.g.kt
-//   - ios/Classes/PigeonApi.g.swift
+//   - ios/dyplink/Sources/dyplink/PigeonApi.g.swift
 //
 // To regenerate after changes:
 //   dart run pigeon --input pigeons/dyplink_api.dart
 //
 // Design notes:
 //   * Every HostApi method below is a pure forwarding call into the native
-//     Android SDK (com.dyplink.sdk.Dyplink / com.dyplink.push.DyplinkPush /
-//     com.dyplink.banners.DyplinkBanners / com.dyplink.messages.DyplinkMessages).
+//     SDK — on Android com.dyplink.sdk.Dyplink / com.dyplink.push.DyplinkPush /
+//     com.dyplink.banners.DyplinkBanners / com.dyplink.messages.DyplinkMessages,
+//     on iOS the Dyplink / DyplinkPush / DyplinkBanners / DyplinkMessages
+//     singletons of dyplink-ios-sdk.
+//   * Three methods have no iOS counterpart and fail loudly there rather than
+//     pretending: startTokenStream, stopTokenStream (iOS has no token-refresh
+//     callback — the host app owns APNs registration) and registerMiPushToken
+//     (Mi Push is a Xiaomi/Android channel).
 //   * Business logic (queue, retry, session, HTTP, storage) stays in native.
 //   * Streams (deep links, push tokens, message events) are NOT in this file —
 //     they use raw EventChannels because Pigeon models single calls, not streams.
@@ -29,7 +35,7 @@ import 'package:pigeon/pigeon.dart';
     kotlinOut:
         'android/src/main/kotlin/com/dyplink/dyplink/PigeonApi.g.kt',
     kotlinOptions: KotlinOptions(package: 'com.dyplink.dyplink'),
-    swiftOut: 'ios/Classes/PigeonApi.g.swift',
+    swiftOut: 'ios/dyplink/Sources/dyplink/PigeonApi.g.swift',
     swiftOptions: SwiftOptions(),
     dartPackageName: 'dyplink',
   ),
@@ -407,7 +413,17 @@ abstract class DyplinkPushHostApi {
   void initialize();
 
   /// `DyplinkPush.isInitialized`.
-  bool isInitialized();
+  ///
+  /// Named `isPushInitialized`, not `isInitialized`, because the native
+  /// plugin classes implement every HostApi in this file on a single object.
+  /// Pigeon turns each HostApi into an interface/protocol, so two of them
+  /// declaring `isInitialized(): Bool` collapse to one implementation —
+  /// whichever the class writes answers both channels, and the push
+  /// module's own state becomes unreachable. Unlike [DyplinkHostApi.initialize]
+  /// vs [initialize], the signatures here are identical, so there is nothing
+  /// for overload resolution to tell apart. The Dart facade still exposes
+  /// this as `DyplinkPush.isInitialized`.
+  bool isPushInitialized();
 
   /// `DyplinkPush.isRegistered`.
   bool isRegistered();
@@ -415,6 +431,16 @@ abstract class DyplinkPushHostApi {
   /// Forwards to suspend `DyplinkPush.registerToken(token)`.
   @async
   void registerToken(String token);
+
+  /// Forwards to suspend `DyplinkPush.registerMiPushToken(regId)`.
+  ///
+  /// A vendor channel alongside FCM rather than a replacement for it: MIUI
+  /// throttles background FCM, so on Xiaomi devices this is the one that gets
+  /// delivered. The host app owns the Mi Push SDK and passes the regId it
+  /// receives; see the native SDK's `DyplinkPush.registerMiPushToken` for the
+  /// full contract.
+  @async
+  void registerMiPushToken(String regId);
 
   /// Forwards to suspend `DyplinkPush.unregisterToken()`.
   @async

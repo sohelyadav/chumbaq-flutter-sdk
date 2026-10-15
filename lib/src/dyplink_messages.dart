@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/services.dart';
 
+import 'dyplink_diagnostics.dart';
 import 'dyplink_error.dart';
 import 'dyplink_models.dart';
+import 'dyplink_platform.dart';
 import 'pigeon.g.dart' as pg;
 
 /// In-app messages module.
@@ -82,8 +83,10 @@ class DyplinkMessages {
   Future<void> _onEventListen() async {
     try {
       await hostApi.startMessageEventStream();
-    } on PlatformException {
-      // No-op.
+    } on PlatformException catch (e) {
+      // The stream stays open, so the failure would otherwise look like an
+      // app that simply has no messages targeting it.
+      DyplinkDiagnostics.reportFailure('DyplinkMessages.events (start)', e);
     }
     _eventSub = _eventChannel.receiveBroadcastStream().listen(
       (event) {
@@ -103,8 +106,8 @@ class DyplinkMessages {
     _eventSub = null;
     try {
       await hostApi.stopMessageEventStream();
-    } on PlatformException {
-      // No-op.
+    } on PlatformException catch (e) {
+      DyplinkDiagnostics.reportFailure('DyplinkMessages.events (stop)', e);
     }
   }
 
@@ -140,12 +143,13 @@ class DyplinkMessages {
     }
   }
 
-  static bool get _supported => Platform.isAndroid;
+  static bool get _supported => DyplinkPlatform.isSupported;
 
   void _ensureSupported() {
     if (!_supported) {
       throw UnsupportedError(
-        'DyplinkMessages currently only supports Android. iOS support is coming soon.',
+        'DyplinkMessages supports Android and iOS only; this is '
+        '${DyplinkPlatform.description}.',
       );
     }
   }

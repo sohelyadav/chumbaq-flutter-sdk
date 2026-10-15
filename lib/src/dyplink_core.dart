@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/services.dart';
 
+import 'dyplink_diagnostics.dart';
 import 'dyplink_error.dart';
 import 'dyplink_models.dart';
+import 'dyplink_platform.dart';
 import 'pigeon.g.dart' as pg;
 
 /// Main entry point for the Dyplink Flutter SDK.
@@ -47,6 +48,11 @@ class Dyplink {
       EventChannel('com.dyplink.dyplink/deep_links');
 
   /// Whether the SDK has been successfully initialized on the native side.
+  ///
+  /// Answers false rather than throwing on a platform the native plugin does
+  /// not support, so feature detection does not need a `try`. See the
+  /// README's platform-support section for the full list of members that
+  /// answer instead of throwing.
   Future<bool> get isInitialized =>
       _supported ? runCatchingDyplink(hostApi.isInitialized) : Future.value(false);
 
@@ -174,8 +180,10 @@ class Dyplink {
   Future<void> _onDeepLinkListen() async {
     try {
       await hostApi.startDeepLinkStream();
-    } on PlatformException {
+    } on PlatformException catch (e) {
       // Swallow — the stream will still be open; we just won't emit events.
+      // Which is indistinguishable from "no links arrived", hence the report.
+      DyplinkDiagnostics.reportFailure('Dyplink.deepLinks (start)', e);
     }
     _deepLinkSub = _deepLinkChannel.receiveBroadcastStream().listen(
       (event) {
@@ -197,8 +205,8 @@ class Dyplink {
     _deepLinkSub = null;
     try {
       await hostApi.stopDeepLinkStream();
-    } on PlatformException {
-      // No-op.
+    } on PlatformException catch (e) {
+      DyplinkDiagnostics.reportFailure('Dyplink.deepLinks (stop)', e);
     }
   }
 
@@ -218,21 +226,33 @@ class Dyplink {
   /// stream apps already listen to.
   bool emitDeepLink(DeepLinkResult link) {
     final controller = _deepLinkController;
-    if (controller == null || controller.isClosed) return false;
+    if (controller == null || controller.isClosed) {
+      DyplinkDiagnostics.reportSkipped(
+        'Dyplink.emitDeepLink',
+        'nothing has subscribed to Dyplink.deepLinks yet, so the link was '
+            'not published — use the value returned by the call that '
+            'produced it',
+      );
+      return false;
+    }
     controller.add(link);
     return true;
   }
 
   // ── Platform support ────────────────────────────────────────────────────
 
-  /// Whether the current platform is supported. Returns false on iOS, web,
-  /// desktop — the iOS SDK is not yet built.
-  static bool get _supported => Platform.isAndroid;
+  /// Whether the current platform is supported. False on web and desktop —
+  /// the plugin has a native bridge for Android and iOS only.
+  ///
+  /// Resolved through [DyplinkPlatform] rather than `dart:io` so tests can
+  /// reach both branches; see that class for why.
+  static bool get _supported => DyplinkPlatform.isSupported;
 
   void _ensureSupported() {
     if (!_supported) {
       throw UnsupportedError(
-        'Dyplink currently only supports Android. iOS support is coming soon.',
+        'Dyplink supports Android and iOS only; this is '
+        '${DyplinkPlatform.description}.',
       );
     }
   }

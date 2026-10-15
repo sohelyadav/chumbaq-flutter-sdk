@@ -40,7 +40,8 @@ import android.os.Looper
  *     [DyplinkBannersHostApi], [DyplinkMessagesHostApi]
  *   - EventChannels    (broadcast streams)
  *       * com.dyplink.dyplink/deep_links     — [DeepLinkResult]s
- *       * com.dyplink.dyplink/push_tokens    — FCM token strings
+ *       * com.dyplink.dyplink/push_tokens    — FCM token strings, republished
+ *         by [DyplinkFlutterMessagingService] on a Firebase token refresh
  *       * com.dyplink.dyplink/message_events — in-app message interactions
  *   - PlatformViewFactory  (native UI)
  *       * com.dyplink.dyplink/banner_carousel — embeds [com.dyplink.banners.ui.BannerCarouselView]
@@ -56,7 +57,16 @@ class DyplinkPlugin :
 
     // Scope for bridging suspend SDK calls into Pigeon's callback-style handlers.
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private val mainHandler = Handler(Looper.getMainLooper())
+
+    // EventSinks must be fed from the main thread, but the SDK's listeners
+    // fire on whichever thread did the work.
+    //
+    // `by lazy` and not a field initializer: Looper.getMainLooper() is null
+    // under a plain JVM unit test, so constructing the Handler eagerly would
+    // make the whole class unconstructible there. Overridable for the same
+    // reason — a test substitutes an inline dispatch.
+    internal var postToMain: (Runnable) -> Unit = { mainHandler.post(it) }
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
     // Stream machinery
     private var deepLinkEventSink: EventChannel.EventSink? = null
@@ -65,6 +75,17 @@ class DyplinkPlugin :
 
     // Track whether the Dart side has subscribed (start*Stream was called).
     private var deepLinkStreamActive = false
+    private var tokenStreamActive = false
+
+    // The observer that forwards republished FCM tokens to Flutter.
+    //
+    // Registered with DyplinkFlutterMessagingService rather than with the
+    // native SDK: DyplinkPush.onTokenRefresh is internal to that module, and
+    // the service's override point is the only public hook on a refresh.
+    private val tokenRefreshObserver =
+        DyplinkFlutterMessagingService.TokenRefreshObserver { token ->
+            postToMain { pushTokenEventSink?.success(token) }
+        }
 
     // The listener that forwards native DeepLinkResults to Flutter.
     //
@@ -72,7 +93,7 @@ class DyplinkPlugin :
     // Map<String, Any?> keyed by field name. The Dart facade decodes it back
     // into a DeepLinkResult via DeepLinkResult._fromEventMap.
     private val deepLinkListener = DeepLinkListener { result ->
-        mainHandler.post {
+        postToMain {
             deepLinkEventSink?.success(result.toEventMap())
         }
     }
@@ -80,7 +101,7 @@ class DyplinkPlugin :
     // The listener that forwards in-app message events to Flutter.
     private val messageListener = object : MessageListener {
         override fun onMessageEvent(message: InAppMessage, eventType: String, buttonId: String?) {
-            mainHandler.post {
+            postToMain {
                 messageEventSink?.success(
                     mapOf(
                         "type" to "message_event",
@@ -93,7 +114,7 @@ class DyplinkPlugin :
         }
 
         override fun onButtonAction(message: InAppMessage, button: MessageButton) {
-            mainHandler.post {
+            postToMain {
                 messageEventSink?.success(
                     mapOf(
                         "type" to "button_action",
@@ -105,7 +126,7 @@ class DyplinkPlugin :
         }
 
         override fun onCustomEvent(message: InAppMessage, eventName: String) {
-            mainHandler.post {
+            postToMain {
                 messageEventSink?.success(
                     mapOf(
                         "type" to "custom_event",
@@ -142,10 +163,8 @@ class DyplinkPlugin :
             },
         )
 
-        // Push token stream — PushTokenManager currently has no public refresh
-        // callback hook. We still wire the channel so the Dart side can listen;
-        // tokens can be emitted later via [emitPushToken] if/when the native
-        // SDK exposes a hook.
+        // Push token stream — fed by [tokenRefreshObserver] once the Dart
+        // side calls startTokenStream.
         EventChannel(messenger, "com.dyplink.dyplink/push_tokens").setStreamHandler(
             object : EventChannel.StreamHandler {
                 override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
@@ -188,6 +207,10 @@ class DyplinkPlugin :
             runCatching { Dyplink.setDeepLinkListener(null) }
             deepLinkStreamActive = false
         }
+        // The observer list is static and outlives the engine, so leaving the
+        // observer registered would leak this plugin and push tokens into a
+        // sink that is about to be nulled.
+        stopTokenStream()
         runCatching { DyplinkMessages.setMessageListener(null) }
 
         deepLinkEventSink = null
@@ -291,12 +314,24 @@ class DyplinkPlugin :
         DyplinkPush.init(applicationContext)
     }
 
+    override fun isPushInitialized(): Boolean = DyplinkPush.isInitialized
+
     override fun isRegistered(): Boolean = DyplinkPush.isRegistered
 
     override fun registerToken(token: String, callback: (Result<Unit>) -> Unit) {
         scope.launch {
             runCatching {
                 withContext(Dispatchers.IO) { DyplinkPush.registerToken(token) }
+            }
+                .onSuccess { callback(Result.success(Unit)) }
+                .onFailure { callback(Result.failure(it.toFlutterError())) }
+        }
+    }
+
+    override fun registerMiPushToken(regId: String, callback: (Result<Unit>) -> Unit) {
+        scope.launch {
+            runCatching {
+                withContext(Dispatchers.IO) { DyplinkPush.registerMiPushToken(regId) }
             }
                 .onSuccess { callback(Result.success(Unit)) }
                 .onFailure { callback(Result.failure(it.toFlutterError())) }
@@ -314,14 +349,17 @@ class DyplinkPlugin :
     }
 
     override fun startTokenStream() {
-        // No-op: DyplinkPush doesn't currently expose a refresh listener hook.
-        // The Dart side can still subscribe; tokens will be delivered when a
-        // future native-SDK API is added. Kept here so the Dart facade's
-        // lifecycle contract stays clean.
+        if (!tokenStreamActive) {
+            DyplinkFlutterMessagingService.addObserver(tokenRefreshObserver)
+            tokenStreamActive = true
+        }
     }
 
     override fun stopTokenStream() {
-        // No-op for symmetry with startTokenStream.
+        if (tokenStreamActive) {
+            DyplinkFlutterMessagingService.removeObserver(tokenRefreshObserver)
+            tokenStreamActive = false
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────────
