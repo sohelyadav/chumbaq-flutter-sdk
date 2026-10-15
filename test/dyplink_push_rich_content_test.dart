@@ -102,4 +102,80 @@ void main() {
       expect(DyplinkPush.timerFrom({'dyplink_timer': '{{{'}), isNull);
     });
   });
+
+  group('actionsFrom', () {
+    test('reads the buttons a campaign carried, in order', () {
+      final actions = DyplinkPush.actionsFrom({
+        'dyplink_actions': jsonEncode([
+          {'id': 'shop', 'title': 'Shop now', 'deepLinkUrl': 'app://sale'},
+          {'id': 'later', 'title': 'Remind me'},
+        ]),
+      });
+
+      expect(actions.map((a) => a.id), ['shop', 'later']);
+      expect(actions.first.title, 'Shop now');
+      expect(actions.first.deepLinkUrl, 'app://sale');
+      // Null means the campaign's own deep link applies.
+      expect(actions.last.deepLinkUrl, isNull);
+    });
+
+    test('drops a button with no id, since a tap could not be attributed', () {
+      final actions = DyplinkPush.actionsFrom({
+        'dyplink_actions': jsonEncode([
+          {'title': 'Nameless'},
+          {'id': 'ok', 'title': 'Fine'},
+        ]),
+      });
+
+      expect(actions.map((a) => a.id), ['ok']);
+    });
+
+    test('drops a button with no title, since there is nothing to show', () {
+      final actions = DyplinkPush.actionsFrom({
+        'dyplink_actions': jsonEncode([
+          {'id': 'blank'},
+          {'id': 'ok', 'title': 'Fine'},
+        ]),
+      });
+
+      expect(actions.map((a) => a.id), ['ok']);
+    });
+
+    test('is empty when the campaign carried none', () {
+      expect(DyplinkPush.actionsFrom({}), isEmpty);
+      expect(DyplinkPush.actionsFrom({'dyplink_actions': ''}), isEmpty);
+    });
+
+    test('survives malformed json', () {
+      expect(DyplinkPush.actionsFrom({'dyplink_actions': 'not json'}), isEmpty);
+      expect(
+        DyplinkPush.actionsFrom({'dyplink_actions': jsonEncode({'a': 1})}),
+        isEmpty,
+      );
+    });
+
+    test('survives a value that is not a string at all', () {
+      expect(DyplinkPush.actionsFrom({'dyplink_actions': 42}), isEmpty);
+    });
+  });
+
+  group('imageUrlFrom', () {
+    test('reads the image a campaign carried', () {
+      expect(
+        DyplinkPush.imageUrlFrom({'dyplink_image_url': 'https://cdn.test/hero.png'}),
+        'https://cdn.test/hero.png',
+      );
+    });
+
+    test('is null when the campaign carried none', () {
+      // Which is the ordinary case over FCM: it has an image field of its
+      // own and its client SDK renders it without help.
+      expect(DyplinkPush.imageUrlFrom({}), isNull);
+      expect(DyplinkPush.imageUrlFrom({'dyplink_image_url': ''}), isNull);
+    });
+
+    test('is null for a value that is not a string', () {
+      expect(DyplinkPush.imageUrlFrom({'dyplink_image_url': 42}), isNull);
+    });
+  });
 }

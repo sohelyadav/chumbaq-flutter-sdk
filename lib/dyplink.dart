@@ -43,6 +43,7 @@ export 'src/dyplink_models.dart'
         MessageLifecycleEvent,
         MessageButtonAction,
         MessageCustomEvent,
+        PushAction,
         PushCarouselSlide,
         PushTimer;
 

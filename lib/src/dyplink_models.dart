@@ -783,6 +783,51 @@ class PushCarouselSlide {
   }
 }
 
+/// One button under a push campaign's notification.
+///
+/// Mirrors `PushAction` on the backend. Android's own SDK draws these on the
+/// notification itself; this is for the app's own use — attributing a tap to
+/// the button that caused it, or re-showing the same choices in a screen.
+///
+/// iOS cannot render them from a payload at all: a notification's buttons
+/// come from a `UNNotificationCategory` the app registered at launch, which
+/// is why a campaign carries an iOS category name instead.
+class PushAction {
+  const PushAction({
+    required this.id,
+    required this.title,
+    this.deepLinkUrl,
+  });
+
+  /// Reported back with a click, so a tap can be told from a button.
+  final String id;
+
+  final String title;
+
+  /// Where this button leads. Null means the campaign's own deep link — the
+  /// one [DyplinkPush.reportNotificationClicked] hands back.
+  final String? deepLinkUrl;
+
+  /// Built from a decoded payload entry, which crosses a platform channel and
+  /// may hold anything. Null when it has no id or no title: a button with
+  /// nothing on it, or one that cannot be told apart from another when it is
+  /// tapped, is not a button.
+  static PushAction? fromMap(Map<Object?, Object?> map) {
+    String? optional(Object? value) =>
+        value is String && value.isNotEmpty ? value : null;
+
+    final id = optional(map['id']);
+    final title = optional(map['title']);
+    if (id == null || title == null) return null;
+
+    return PushAction(
+      id: id,
+      title: title,
+      deepLinkUrl: optional(map['deepLinkUrl']),
+    );
+  }
+}
+
 /// A countdown carried by a push campaign, rendered by the client.
 class PushTimer {
   const PushTimer({required this.endsAt, this.expiredTitle, this.expiredBody});

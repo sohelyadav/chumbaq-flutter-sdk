@@ -22,6 +22,8 @@ const List<String> _deepLinkDataKeys = <String>['deep_link_url', 'link'];
 /// Keys carrying content no push provider renders itself.
 const String _carouselDataKey = 'dyplink_carousel';
 const String _timerDataKey = 'dyplink_timer';
+const String _actionsDataKey = 'dyplink_actions';
+const String _imageUrlDataKey = 'dyplink_image_url';
 
 /// Optional push notification module for the Dyplink SDK.
 ///
@@ -239,6 +241,41 @@ class DyplinkPush {
     } on FormatException {
       // Malformed content costs the extras, never the notification.
       return const <PushCarouselSlide>[];
+    }
+  }
+
+  /// A campaign's image, or null when it carries none.
+  ///
+  /// Only a campaign delivered over APNs or Mi Push carries this: FCM has an
+  /// image field of its own and its client SDK renders it without help. So a
+  /// null here does not mean the notification had no picture — it means
+  /// there is none for the app to draw itself.
+  static String? imageUrlFrom(Map<String, dynamic> data) {
+    final raw = data[_imageUrlDataKey];
+    return raw is String && raw.isNotEmpty ? raw : null;
+  }
+
+  /// A campaign's action buttons, in the order the campaign set them.
+  ///
+  /// Surfaced for the same reason as [carouselFrom]: the native SDK has
+  /// already drawn the notification by the time Dart is running, so this is
+  /// for the app's own use rather than for rendering the notification.
+  /// Android's SDK renders at most three of these on the notification itself,
+  /// and iOS renders none from a payload.
+  static List<PushAction> actionsFrom(Map<String, dynamic> data) {
+    final raw = data[_actionsDataKey];
+    if (raw is! String || raw.isEmpty) return const <PushAction>[];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const <PushAction>[];
+      return decoded
+          .whereType<Map<Object?, Object?>>()
+          .map(PushAction.fromMap)
+          .whereType<PushAction>()
+          .toList(growable: false);
+    } on FormatException {
+      // Malformed content costs the extras, never the notification.
+      return const <PushAction>[];
     }
   }
 
