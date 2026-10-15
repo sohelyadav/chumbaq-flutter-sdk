@@ -12,6 +12,7 @@
 ///   * [DyplinkPush] — push notification registration
 ///   * [DyplinkBanners] + [DyplinkBannerCarousel] — in-app banner carousel
 ///   * [DyplinkMessages] — in-app message trigger points and event stream
+///   * [DyplinkDiagnostics] — opt-in reporting of swallowed failures
 library;
 
 // Core entry point.
@@ -21,6 +22,9 @@ export 'src/dyplink_core.dart' show Dyplink;
 export 'src/dyplink_push.dart' show DyplinkPush;
 export 'src/dyplink_banners.dart' show DyplinkBanners, DyplinkBannerCarousel;
 export 'src/dyplink_messages.dart' show DyplinkMessages;
+
+// Debugging aid, off by default.
+export 'src/dyplink_diagnostics.dart' show DyplinkDiagnostics;
 
 // Public models and builders.
 export 'src/dyplink_models.dart'

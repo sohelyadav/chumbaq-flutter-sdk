@@ -1,12 +1,12 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' hide Banner;
 
+import 'dyplink_diagnostics.dart';
 import 'dyplink_error.dart';
 import 'dyplink_models.dart';
+import 'dyplink_platform.dart';
 import 'pigeon.g.dart' as pg;
 
 /// Banners module — loads and caches in-app banner categories.
@@ -57,12 +57,13 @@ class DyplinkBanners {
     return runCatchingDyplink(hostApi.clearCache);
   }
 
-  static bool get _supported => Platform.isAndroid;
+  static bool get _supported => DyplinkPlatform.isSupported;
 
   void _ensureSupported() {
     if (!_supported) {
       throw UnsupportedError(
-        'DyplinkBanners currently only supports Android. iOS support is coming soon.',
+        'DyplinkBanners supports Android and iOS only; this is '
+        '${DyplinkPlatform.description}.',
       );
     }
   }
@@ -83,7 +84,11 @@ class DyplinkBanners {
 /// )
 /// ```
 ///
-/// On non-Android platforms this widget renders an empty [SizedBox.shrink].
+/// On non-Android platforms this widget renders an empty [SizedBox.shrink]
+/// rather than throwing the way the rest of [DyplinkBanners] does: a widget
+/// cannot report an unsupported platform out of `build` without replacing
+/// the screen with an error box. Turn on [DyplinkDiagnostics] to see it
+/// happen.
 class DyplinkBannerCarousel extends StatelessWidget {
   const DyplinkBannerCarousel({
     super.key,
@@ -102,7 +107,14 @@ class DyplinkBannerCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!Platform.isAndroid) return const SizedBox.shrink();
+    if (!DyplinkPlatform.isAndroid) {
+      DyplinkDiagnostics.reportSkipped(
+        'DyplinkBannerCarousel',
+        'the native carousel view exists on Android only, so nothing was '
+            'rendered for category "$categoryId"',
+      );
+      return const SizedBox.shrink();
+    }
 
     final view = AndroidView(
       viewType: _viewType,

@@ -1011,12 +1011,34 @@ interface DyplinkPushHostApi {
    * Named `initialize` (not `init`) — see [DyplinkHostApi.initialize] for why.
    */
   fun initialize()
-  /** `DyplinkPush.isInitialized`. */
-  fun isInitialized(): Boolean
+  /**
+   * `DyplinkPush.isInitialized`.
+   *
+   * Named `isPushInitialized`, not `isInitialized`, because the native
+   * plugin classes implement every HostApi in this file on a single object.
+   * Pigeon turns each HostApi into an interface/protocol, so two of them
+   * declaring `isInitialized(): Bool` collapse to one implementation —
+   * whichever the class writes answers both channels, and the push
+   * module's own state becomes unreachable. Unlike [DyplinkHostApi.initialize]
+   * vs [initialize], the signatures here are identical, so there is nothing
+   * for overload resolution to tell apart. The Dart facade still exposes
+   * this as `DyplinkPush.isInitialized`.
+   */
+  fun isPushInitialized(): Boolean
   /** `DyplinkPush.isRegistered`. */
   fun isRegistered(): Boolean
   /** Forwards to suspend `DyplinkPush.registerToken(token)`. */
   fun registerToken(token: String, callback: (Result<Unit>) -> Unit)
+  /**
+   * Forwards to suspend `DyplinkPush.registerMiPushToken(regId)`.
+   *
+   * A vendor channel alongside FCM rather than a replacement for it: MIUI
+   * throttles background FCM, so on Xiaomi devices this is the one that gets
+   * delivered. The host app owns the Mi Push SDK and passes the regId it
+   * receives; see the native SDK's `DyplinkPush.registerMiPushToken` for the
+   * full contract.
+   */
+  fun registerMiPushToken(regId: String, callback: (Result<Unit>) -> Unit)
   /** Forwards to suspend `DyplinkPush.unregisterToken()`. */
   fun unregisterToken(callback: (Result<Unit>) -> Unit)
   fun startTokenStream()
@@ -1048,11 +1070,11 @@ interface DyplinkPushHostApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isInitialized$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isPushInitialized$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
-              listOf(api.isInitialized())
+              listOf(api.isPushInitialized())
             } catch (exception: Throwable) {
               wrapError(exception)
             }
@@ -1084,6 +1106,25 @@ interface DyplinkPushHostApi {
             val args = message as List<Any?>
             val tokenArg = args[0] as String
             api.registerToken(tokenArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.dyplink.DyplinkPushHostApi.registerMiPushToken$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val regIdArg = args[0] as String
+            api.registerMiPushToken(regIdArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))

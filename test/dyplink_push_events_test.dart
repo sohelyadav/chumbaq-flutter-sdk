@@ -3,6 +3,8 @@
 //
 // Scope:
 //   * dyplink_campaign_id gating — present reports, absent/blank does not
+//   * every event type the backend accepts, and only those
+//   * metadata, including the actionId that attributes an action-button tap
 //   * shape of the payload handed to the network transport
 //   * a transport (network) failure never throws
 //
@@ -125,6 +127,176 @@ void main() {
       await DyplinkPush.instance.reportNotificationClicked({'foo': 'bar'});
 
       expect(sent, isEmpty);
+    });
+  });
+
+  group('reportNotificationImpression', () {
+    test('reports "impression"', () async {
+      await DyplinkPush.instance
+          .reportNotificationImpression({'dyplink_campaign_id': 'camp-3'});
+
+      expect(sent.single['type'], 'impression');
+      expect(sent.single['campaignId'], 'camp-3');
+    });
+
+    test('does nothing when dyplink_campaign_id is absent', () async {
+      await DyplinkPush.instance.reportNotificationImpression({'foo': 'bar'});
+
+      expect(sent, isEmpty);
+    });
+  });
+
+  group('reportNotificationDismissed', () {
+    test('reports "dismissed"', () async {
+      await DyplinkPush.instance
+          .reportNotificationDismissed({'dyplink_campaign_id': 'camp-4'});
+
+      expect(sent.single['type'], 'dismissed');
+      expect(sent.single['campaignId'], 'camp-4');
+    });
+
+    test('does nothing when dyplink_campaign_id is absent', () async {
+      await DyplinkPush.instance.reportNotificationDismissed({'foo': 'bar'});
+
+      expect(sent, isEmpty);
+    });
+  });
+
+  group('event types', () {
+    test('every reported type is one the backend accepts', () async {
+      // CLIENT_REPORTABLE_EVENT_TYPES in the API's
+      // push-notification-event.entity.ts. `sent` is excluded there on
+      // purpose — it is server-written and feeds frequency capping — so a
+      // client must never report it.
+      const accepted = {'delivered', 'impression', 'click', 'dismissed'};
+
+      await DyplinkPush.instance
+          .reportNotificationReceived({'dyplink_campaign_id': 'c'});
+      await DyplinkPush.instance
+          .reportNotificationImpression({'dyplink_campaign_id': 'c'});
+      await DyplinkPush.instance
+          .reportNotificationClicked({'dyplink_campaign_id': 'c'});
+      await DyplinkPush.instance
+          .reportNotificationDismissed({'dyplink_campaign_id': 'c'});
+
+      final reported = sent.map((body) => body['type']).toSet();
+      expect(reported, accepted);
+    });
+  });
+
+  group('metadata', () {
+    test('is forwarded when given', () async {
+      await DyplinkPush.instance.reportNotificationReceived(
+        {'dyplink_campaign_id': 'camp-1'},
+        metadata: {'variant': 'b'},
+      );
+
+      expect(sent.single['metadata'], {'variant': 'b'});
+    });
+
+    test('is omitted entirely when absent', () async {
+      await DyplinkPush.instance
+          .reportNotificationReceived({'dyplink_campaign_id': 'camp-1'});
+
+      // Not sent as null: the backend validates metadata as an object when
+      // the key is present and rejects the whole event otherwise.
+      expect(sent.single.containsKey('metadata'), isFalse);
+    });
+
+    test('is omitted when given empty', () async {
+      await DyplinkPush.instance.reportNotificationReceived(
+        {'dyplink_campaign_id': 'camp-1'},
+        metadata: const {},
+      );
+
+      expect(sent.single.containsKey('metadata'), isFalse);
+    });
+  });
+
+  group('action button attribution', () {
+    test('actionId is reported as metadata.actionId', () async {
+      await DyplinkPush.instance.reportNotificationClicked(
+        {'dyplink_campaign_id': 'camp-5'},
+        actionId: 'buy-now',
+      );
+
+      // The key the Android SDK's PushEventReporter uses, so both platforms
+      // land in the same column of a campaign's report.
+      expect(sent.single['metadata'], {'actionId': 'buy-now'});
+      expect(sent.single['type'], 'click');
+    });
+
+    test('actionId rides alongside caller metadata', () async {
+      await DyplinkPush.instance.reportNotificationClicked(
+        {'dyplink_campaign_id': 'camp-5'},
+        actionId: 'buy-now',
+        metadata: {'variant': 'b'},
+      );
+
+      expect(sent.single['metadata'], {'variant': 'b', 'actionId': 'buy-now'});
+    });
+
+    test('actionId wins over an actionId in caller metadata', () async {
+      await DyplinkPush.instance.reportNotificationClicked(
+        {'dyplink_campaign_id': 'camp-5'},
+        actionId: 'buy-now',
+        metadata: {'actionId': 'stale'},
+      );
+
+      expect(sent.single['metadata'], {'actionId': 'buy-now'});
+    });
+
+    test('a body tap reports no actionId', () async {
+      await DyplinkPush.instance
+          .reportNotificationClicked({'dyplink_campaign_id': 'camp-5'});
+
+      expect(sent.single.containsKey('metadata'), isFalse);
+    });
+
+    test("returns the pressed action's own deep link", () async {
+      final url = await DyplinkPush.instance.reportNotificationClicked(
+        {
+          'dyplink_campaign_id': 'camp-5',
+          'deep_link_url': 'myapp://campaign',
+          'dyplink_actions': '[{"id":"buy-now","title":"Buy now",'
+              '"deepLinkUrl":"myapp://checkout"}]',
+        },
+        actionId: 'buy-now',
+      );
+
+      expect(url, 'myapp://checkout');
+    });
+
+    test("falls back to the campaign's deep link when the action has none",
+        () async {
+      final url = await DyplinkPush.instance.reportNotificationClicked(
+        {
+          'dyplink_campaign_id': 'camp-5',
+          'deep_link_url': 'myapp://campaign',
+          'dyplink_actions': '[{"id":"later","title":"Remind me"}]',
+        },
+        actionId: 'later',
+      );
+
+      expect(url, 'myapp://campaign');
+    });
+
+    test("falls back to the campaign's deep link for an unknown actionId",
+        () async {
+      final url = await DyplinkPush.instance.reportNotificationClicked(
+        {
+          'dyplink_campaign_id': 'camp-5',
+          'deep_link_url': 'myapp://campaign',
+          'dyplink_actions': '[{"id":"buy-now","title":"Buy now",'
+              '"deepLinkUrl":"myapp://checkout"}]',
+        },
+        actionId: 'no-such-button',
+      );
+
+      expect(url, 'myapp://campaign');
+      // Still attributed: the campaign's report should record which button
+      // the device claimed, even one this payload does not describe.
+      expect(sent.single['metadata'], {'actionId': 'no-such-button'});
     });
   });
 
