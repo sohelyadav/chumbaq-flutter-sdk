@@ -1,7 +1,7 @@
-# Dyplink Flutter SDK
+# Chumbaq Flutter SDK
 
 Deep linking, deferred deep links, attribution, events, in-app messages,
-banners, and push notifications for Dyplink.
+banners, and push notifications for Chumbaq.
 
 ## Platform support
 
@@ -17,11 +17,11 @@ useful than an exception:
 
 | Member | Where there is no native bridge |
 |---|---|
-| `Dyplink.isInitialized` | `false` |
-| `DyplinkPush.isInitialized` | `false` |
-| `DyplinkPush.isRegistered` | `false` |
-| `DyplinkBannerCarousel` | renders `SizedBox.shrink()` |
-| publishing to `Dyplink.deepLinks` | drops the event |
+| `Chumbaq.isInitialized` | `false` |
+| `ChumbaqPush.isInitialized` | `false` |
+| `ChumbaqPush.isRegistered` | `false` |
+| `ChumbaqBannerCarousel` | renders `SizedBox.shrink()` |
+| publishing to `Chumbaq.deepLinks` | drops the event |
 
 The first three are questions whose honest answer is "no" — making them
 throw would mean wrapping every feature check in a `try`. The carousel is a
@@ -36,12 +36,12 @@ stream or a quiet success:
 
 | Member | Why, and what to do on iOS |
 |---|---|
-| `DyplinkPush.tokens` | APNs hands the device token to the host app's own app delegate, never to the plugin, so there is nothing to stream. Pass the token you receive to `DyplinkPush.registerToken`. |
-| `DyplinkPush.registerMiPushToken` | Mi Push is a Xiaomi delivery channel, and Xiaomi handsets are Android handsets. |
-| `DyplinkBannerCarousel` | The widget hosts Android's native carousel view through a PlatformView. On iOS it renders `SizedBox.shrink()`; call `DyplinkBanners.loadBanners` and build the carousel in Flutter. |
+| `ChumbaqPush.tokens` | APNs hands the device token to the host app's own app delegate, never to the plugin, so there is nothing to stream. Pass the token you receive to `ChumbaqPush.registerToken`. |
+| `ChumbaqPush.registerMiPushToken` | Mi Push is a Xiaomi delivery channel, and Xiaomi handsets are Android handsets. |
+| `ChumbaqBannerCarousel` | The widget hosts Android's native carousel view through a PlatformView. On iOS it renders `SizedBox.shrink()`; call `ChumbaqBanners.loadBanners` and build the carousel in Flutter. |
 
 Push **engagement reporting** is pure Dart over `dart:io`, so it needs only
-`Dyplink.init` — on both platforms, and it worked on iOS before the rest of
+`Chumbaq.init` — on both platforms, and it worked on iOS before the rest of
 the plugin did.
 
 To watch any of these do nothing, turn on [diagnostics](#diagnostics).
@@ -49,11 +49,11 @@ To watch any of these do nothing, turn on [diagnostics](#diagnostics).
 ## iOS setup
 
 > **iOS is not installable from pub.dev yet.** The plugin builds against a
-> *sibling checkout* of the native SDK, because `dyplink-ios-sdk` is not
+> *sibling checkout* of the native SDK, because `chumbaq-ios-sdk` is not
 > published and has no release tag — the same arrangement as Android, which
 > pulls the native SDK from `mavenLocal()`. Until both SDKs are published,
-> iOS support is usable from a Dyplink workspace checkout, not from
-> `flutter pub add dyplink`. See [requirement 2](#2-a-sibling-checkout-of-the-native-ios-sdk).
+> iOS support is usable from a Chumbaq workspace checkout, not from
+> `flutter pub add chumbaq`. See [requirement 2](#2-a-sibling-checkout-of-the-native-ios-sdk).
 
 Two hard requirements. Both fail the build if unmet, and the first one fails
 it before any of your code is compiled.
@@ -61,7 +61,7 @@ it before any of your code is compiled.
 ### 1. Swift Package Manager
 
 **The iOS plugin is a Swift package, with no podspec.** The native
-[iOS SDK](https://github.com/sohelyadav/dyplink-ios-sdk) it wraps ships as a
+[iOS SDK](https://github.com/sohelyadav/chumbaq-ios-sdk) it wraps ships as a
 Swift package and has no CocoaPods spec to depend on, so a pod could not pull
 it in.
 
@@ -75,22 +75,22 @@ flutter config --enable-swift-package-manager
 ```
 
 Without it there is no iOS support at all, and the build stops with the
-reason rather than a confusing `no such module 'DyplinkCore'` later:
+reason rather than a confusing `no such module 'ChumbaqCore'` later:
 
 ```
 The following plugin(s) are only compatible with Swift Package Manager:
-  - dyplink
+  - chumbaq
 ```
 
 ### 2. A sibling checkout of the native iOS SDK
 
 ```
-dyplink/
-  dyplink-flutter-sdk/   <- this repo
-  dyplink-ios-sdk/       <- the native SDK, checked out beside it
+chumbaq/
+  chumbaq-flutter-sdk/   <- this repo
+  chumbaq-ios-sdk/       <- the native SDK, checked out beside it
 ```
 
-`ios/dyplink/Package.swift` resolves the SDK from that path. If it is not
+`ios/chumbaq/Package.swift` resolves the SDK from that path. If it is not
 there, package resolution fails with a message naming the directory it
 looked in — it does not fall back to a stale or partial build. Point the
 manifest somewhere else if your layout differs; swap it for
@@ -105,7 +105,7 @@ app will be on 15.
 Two more steps, both specific to how iOS delivers links:
 
 **1. Register your custom scheme** in `ios/Runner/Info.plist`, matching the
-`customScheme` you pass to `DyplinkConfig`. Without it iOS never hands the
+`customScheme` you pass to `ChumbaqConfig`. Without it iOS never hands the
 URL to the app:
 
 ```xml
@@ -119,13 +119,13 @@ URL to the app:
 ```
 
 **2. For Universal Links**, add the Associated Domains capability
-(`applinks:your.dyplink.host`) and serve the matching
+(`applinks:your.chumbaq.host`) and serve the matching
 `apple-app-site-association` file from that host.
 
 The plugin registers for both the scene and the app-delegate URL callbacks,
 so a `FlutterAppDelegate`-based app needs no code of its own — including for
-a link that launched the app, which arrives before `Dyplink.init` has run
-and is replayed to `Dyplink.deepLinks` once it has.
+a link that launched the app, which arrives before `Chumbaq.init` has run
+and is replayed to `Chumbaq.deepLinks` once it has.
 
 ### Push
 
@@ -137,7 +137,7 @@ func application(
   didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
 ) {
   let hex = deviceToken.map { String(format: "%02x", $0) }.joined()
-  // Hand `hex` to Dart and call DyplinkPush.instance.registerToken(hex).
+  // Hand `hex` to Dart and call ChumbaqPush.instance.registerToken(hex).
 }
 ```
 
@@ -145,28 +145,28 @@ func application(
 
 ```yaml
 dependencies:
-  dyplink: ^0.0.1
+  chumbaq: ^0.0.1
 ```
 
 ## Getting started
 
 ```dart
-final config = DyplinkConfig.builder(
-  baseUrl: 'https://your-dyplink-host',
+final config = ChumbaqConfig.builder(
+  baseUrl: 'https://your-chumbaq-host',
   apiKey: '<project API key>',
   projectId: '<project id>',
 ).build();
 
-await Dyplink.instance.init(config);
+await Chumbaq.instance.init(config);
 
 // Where a deep link should take the app.
-Dyplink.instance.deepLinks.listen((link) => router.go(link.url));
+Chumbaq.instance.deepLinks.listen((link) => router.go(link.url));
 
 // After a fresh install, to claim the click that led to it.
-final match = await Dyplink.instance.matchDeferredDeepLink();
+final match = await Chumbaq.instance.matchDeferredDeepLink();
 
 // Who this is, once they log in.
-await Dyplink.instance.identify(
+await Chumbaq.instance.identify(
   IdentifyParams.builder().externalUserId('u_42').build(),
 );
 ```
@@ -174,15 +174,15 @@ await Dyplink.instance.identify(
 ## In-app messages
 
 ```dart
-DyplinkMessages.instance.events.listen((event) => switch (event) {
+ChumbaqMessages.instance.events.listen((event) => switch (event) {
   MessageLifecycleEvent(:final eventType) => log(eventType),
   MessageButtonAction(:final button) => router.go(button.actionUrl!),
   MessageCustomEvent(:final eventName) => analytics.track(eventName),
 });
 
-await DyplinkMessages.instance.onAppOpen();
-await DyplinkMessages.instance.onScreenView('Home');
-await DyplinkMessages.instance.onEvent('purchase');
+await ChumbaqMessages.instance.onAppOpen();
+await ChumbaqMessages.instance.onScreenView('Home');
+await ChumbaqMessages.instance.onEvent('purchase');
 ```
 
 The **native** SDK draws the message — all five layouts, the picture, the
@@ -196,15 +196,15 @@ on iOS, are the app's; the SDK reports whatever the app hands it. On iOS that
 includes the device token itself — see [iOS setup](#ios-setup).
 
 ```dart
-await DyplinkPush.instance.init();
+await ChumbaqPush.instance.init();
 
 FirebaseMessaging.onMessage.listen(
-  (message) => DyplinkPush.instance.reportNotificationReceived(message.data),
+  (message) => ChumbaqPush.instance.reportNotificationReceived(message.data),
 );
 
 FirebaseMessaging.onMessageOpenedApp.listen((message) async {
   // A tap also hands back the campaign's destination, if it has one.
-  final url = await DyplinkPush.instance.reportNotificationClicked(message.data);
+  final url = await ChumbaqPush.instance.reportNotificationClicked(message.data);
   if (url != null) router.go(url);
 });
 ```
@@ -239,9 +239,9 @@ from a tap on the body if the button's id comes along. Pass it as
 uses.
 
 ```dart
-final actions = DyplinkPush.actionsFrom(message.data);
+final actions = ChumbaqPush.actionsFrom(message.data);
 
-final url = await DyplinkPush.instance.reportNotificationClicked(
+final url = await ChumbaqPush.instance.reportNotificationClicked(
   message.data,
   actionId: actions.first.id,
 );
@@ -253,10 +253,10 @@ and the campaign's destination otherwise.
 ### Token updates — Android only
 
 ```dart
-DyplinkPush.instance.tokens.listen((token) => log('new push token: $token'));
+ChumbaqPush.instance.tokens.listen((token) => log('new push token: $token'));
 ```
 
-Emits whenever Firebase issues a new registration token. Dyplink has already
+Emits whenever Firebase issues a new registration token. Chumbaq has already
 registered it with the backend by then — the stream is for apps that need to
 do something of their own with it.
 
@@ -264,7 +264,7 @@ On iOS this throws `UnsupportedError`. APNs gives the device token to the
 host app's own
 `application(_:didRegisterForRemoteNotificationsWithDeviceToken:)` and never
 to the plugin, so there is nothing to stream; call
-`DyplinkPush.instance.registerToken` with what you receive.
+`ChumbaqPush.instance.registerToken` with what you receive.
 
 There is no replay: a refresh is an event, so a subscriber that starts
 listening afterwards sees nothing. A refresh delivered to a background
@@ -274,23 +274,23 @@ no stream to reach.
 This rides on the plugin's own `FirebaseMessagingService` subclass, which
 the plugin's manifest installs in place of the native SDK's. An app that
 registers a service of its own instead should subclass
-`DyplinkFlutterMessagingService`, or forward its `onNewToken` to
-`DyplinkFlutterMessagingService.publishToken(token)`.
+`ChumbaqFlutterMessagingService`, or forward its `onNewToken` to
+`ChumbaqFlutterMessagingService.publishToken(token)`.
 
 ### Xiaomi devices — Android only
 
 MIUI throttles background FCM hard enough that on Xiaomi handsets the vendor
 channel is the one that gets delivered. The app owns the Mi Push SDK —
-Dyplink does not depend on Xiaomi's closed-source AAR — so add it to the
+Chumbaq does not depend on Xiaomi's closed-source AAR — so add it to the
 Android build, call `MiPushClient.registerPush`, and hand the regId over:
 
 ```dart
-await DyplinkPush.instance.registerMiPushToken(regId);
+await ChumbaqPush.instance.registerMiPushToken(regId);
 ```
 
 This is an addition, not a replacement: the backend keeps both tokens,
 prefers the vendor channel, and still sends exactly one notification. A
-`DyplinkApiError` with status 400 means the deployment has no Mi Push
+`ChumbaqApiError` with status 400 means the deployment has no Mi Push
 credentials configured.
 
 ### Rich content is handed over as data, not drawn
@@ -302,10 +302,10 @@ attributing a tap to the button that caused it, or re-showing the same
 content in a screen:
 
 ```dart
-final slides  = DyplinkPush.carouselFrom(message.data);  // List<PushCarouselSlide>
-final timer   = DyplinkPush.timerFrom(message.data);     // PushTimer?
-final actions = DyplinkPush.actionsFrom(message.data);   // List<PushAction>
-final image   = DyplinkPush.imageUrlFrom(message.data);  // String?
+final slides  = ChumbaqPush.carouselFrom(message.data);  // List<PushCarouselSlide>
+final timer   = ChumbaqPush.timerFrom(message.data);     // PushTimer?
+final actions = ChumbaqPush.actionsFrom(message.data);   // List<PushAction>
+final image   = ChumbaqPush.imageUrlFrom(message.data);  // String?
 ```
 
 Each of them answers empty or null for a payload that carries none, or
@@ -325,7 +325,7 @@ The result is that a misconfigured integration looks exactly like a working
 one: calls return, streams stay open, and nothing happens.
 
 ```dart
-DyplinkDiagnostics.enabled = true;  // before Dyplink.init
+ChumbaqDiagnostics.enabled = true;  // before Chumbaq.init
 ```
 
 Turning this on makes those paths say so — which call went quiet, and
@@ -333,13 +333,13 @@ whether it was a failure or a skip. Behaviour is identical either way; it is
 a debugging aid, not an error channel, and it is off by default.
 
 Reports go to `debugPrint`. Send them somewhere else with
-`DyplinkDiagnostics.sink`. Nothing logged carries an API key, a push token
+`ChumbaqDiagnostics.sink`. Nothing logged carries an API key, a push token
 or a device fingerprint, so a report is safe to paste into an issue.
 
 ## Related SDKs
 
-- [iOS SDK](https://github.com/sohelyadav/dyplink-ios-sdk)
-- [Android SDK](https://github.com/sohelyadav/dyplink-android-sdk)
+- [iOS SDK](https://github.com/sohelyadav/chumbaq-ios-sdk)
+- [Android SDK](https://github.com/sohelyadav/chumbaq-android-sdk)
 
 ## License
 

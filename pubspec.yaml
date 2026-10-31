@@ -1,9 +1,9 @@
-name: dyplink
-description: "Dyplink Flutter SDK — deep linking, attribution, events, push, banners, and in-app messages"
+name: chumbaq
+description: "Chumbaq Flutter SDK — deep linking, attribution, events, push, banners, and in-app messages"
 version: 0.0.1
-homepage: https://github.com/sohelyadav/dyplink-flutter-sdk
-repository: https://github.com/sohelyadav/dyplink-flutter-sdk
-issue_tracker: https://github.com/sohelyadav/dyplink-flutter-sdk/issues
+homepage: https://github.com/sohelyadav/chumbaq-flutter-sdk
+repository: https://github.com/sohelyadav/chumbaq-flutter-sdk
+issue_tracker: https://github.com/sohelyadav/chumbaq-flutter-sdk/issues
 
 environment:
   sdk: ^3.11.1
@@ -39,10 +39,10 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.dyplink.dyplink
-        pluginClass: DyplinkPlugin
+        package: com.chumbaq.chumbaq
+        pluginClass: ChumbaqPlugin
       ios:
-        pluginClass: DyplinkPlugin
+        pluginClass: ChumbaqPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

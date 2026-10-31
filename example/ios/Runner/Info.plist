@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Dyplink</string>
+	<string>Chumbaq</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>dyplink_example</string>
+	<string>chumbaq_example</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -28,13 +28,13 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.dyplink.dyplinkExample.deeplink</string>
+			<string>com.chumbaq.chumbaqExample.deeplink</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<!-- Must match DyplinkConfig.customScheme in lib/main.dart.
-				     Without this iOS never delivers dyplinkexample:// URLs to
+				<!-- Must match ChumbaqConfig.customScheme in lib/main.dart.
+				     Without this iOS never delivers chumbaqexample:// URLs to
 				     the app, so the plugin has nothing to parse. -->
-				<string>dyplinkexample</string>
+				<string>chumbaqexample</string>
 			</array>
 		</dict>
 	</array>
@@ -44,7 +44,7 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<!-- Lets the example talk to a Dyplink API running on http://localhost
+		<!-- Lets the example talk to a Chumbaq API running on http://localhost
 		     during development. Only localhost and .local are exempted. -->
 		<key>NSAllowsLocalNetworking</key>
 		<true/>

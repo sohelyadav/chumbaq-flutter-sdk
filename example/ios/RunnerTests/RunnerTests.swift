@@ -3,7 +3,7 @@ import UIKit
 import XCTest
 
 
-@testable import dyplink
+@testable import chumbaq
 
 // This demonstrates a simple unit test of the Swift portion of this plugin's implementation.
 //
@@ -12,7 +12,7 @@ import XCTest
 class RunnerTests: XCTestCase {
 
   func testGetPlatformVersion() {
-    let plugin = DyplinkPlugin()
+    let plugin = ChumbaqPlugin()
 
     let call = FlutterMethodCall(methodName: "getPlatformVersion", arguments: [])
 

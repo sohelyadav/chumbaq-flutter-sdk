@@ -1,1 +1,1 @@
-rootProject.name = 'dyplink'
+rootProject.name = 'chumbaq'

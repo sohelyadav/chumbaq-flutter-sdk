@@ -1,6 +1,6 @@
-# dyplink_example
+# chumbaq_example
 
-Demonstrates how to use the dyplink plugin.
+Demonstrates how to use the chumbaq plugin.
 
 ## Getting Started
 
