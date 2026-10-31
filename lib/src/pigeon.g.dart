@@ -15,8 +15,8 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
-/// Mirrors com.dyplink.sdk.internal.util.LogLevel.
-enum DyplinkLogLevel {
+/// Mirrors com.chumbaq.sdk.internal.util.LogLevel.
+enum ChumbaqLogLevel {
   none,
   error,
   warn,
@@ -25,19 +25,19 @@ enum DyplinkLogLevel {
   verbose,
 }
 
-/// Flat configuration object passed to [DyplinkHostApi.init].
+/// Flat configuration object passed to [ChumbaqHostApi.init].
 ///
 /// All fields have the same semantics as
-/// `com.dyplink.sdk.DyplinkConfig.Builder`. The native side converts this
-/// to a real `DyplinkConfig` via its builder so validation rules
+/// `com.chumbaq.sdk.ChumbaqConfig.Builder`. The native side converts this
+/// to a real `ChumbaqConfig` via its builder so validation rules
 /// (non-blank strings, positive intervals) are enforced by existing Kotlin
 /// code.
-class DyplinkConfigDto {
-  DyplinkConfigDto({
+class ChumbaqConfigDto {
+  ChumbaqConfigDto({
     required this.baseUrl,
     required this.apiKey,
     required this.projectId,
-    this.logLevel = DyplinkLogLevel.none,
+    this.logLevel = ChumbaqLogLevel.none,
     this.flushIntervalSeconds = 30,
     this.maxQueueSize = 1000,
     this.maxRetries = 3,
@@ -54,7 +54,7 @@ class DyplinkConfigDto {
 
   String projectId;
 
-  DyplinkLogLevel logLevel;
+  ChumbaqLogLevel logLevel;
 
   int flushIntervalSeconds;
 
@@ -89,13 +89,13 @@ class DyplinkConfigDto {
     ];
   }
 
-  static DyplinkConfigDto decode(Object result) {
+  static ChumbaqConfigDto decode(Object result) {
     result as List<Object?>;
-    return DyplinkConfigDto(
+    return ChumbaqConfigDto(
       baseUrl: result[0]! as String,
       apiKey: result[1]! as String,
       projectId: result[2]! as String,
-      logLevel: result[3]! as DyplinkLogLevel,
+      logLevel: result[3]! as ChumbaqLogLevel,
       flushIntervalSeconds: result[4]! as int,
       maxQueueSize: result[5]! as int,
       maxRetries: result[6]! as int,
@@ -108,7 +108,7 @@ class DyplinkConfigDto {
   }
 }
 
-/// Mirrors com.dyplink.sdk.model.IdentifyParams — flat DTO (builder lives in Dart).
+/// Mirrors com.chumbaq.sdk.model.IdentifyParams — flat DTO (builder lives in Dart).
 class IdentifyParamsDto {
   IdentifyParamsDto({
     this.distinctId,
@@ -240,7 +240,7 @@ class IdentifyParamsDto {
   }
 }
 
-/// Mirrors com.dyplink.sdk.model.IdentifyResult.
+/// Mirrors com.chumbaq.sdk.model.IdentifyResult.
 class IdentifyResultDto {
   IdentifyResultDto({
     required this.id,
@@ -287,7 +287,7 @@ class IdentifyResultDto {
   }
 }
 
-/// Mirrors com.dyplink.sdk.model.DeepLinkResult.
+/// Mirrors com.chumbaq.sdk.model.DeepLinkResult.
 class DeepLinkResultDto {
   DeepLinkResultDto({
     required this.url,
@@ -329,7 +329,7 @@ class DeepLinkResultDto {
   }
 }
 
-/// Mirrors com.dyplink.sdk.model.DeferredMatchResult.
+/// Mirrors com.chumbaq.sdk.model.DeferredMatchResult.
 class DeferredMatchResultDto {
   DeferredMatchResultDto({
     required this.matched,
@@ -366,7 +366,7 @@ class DeferredMatchResultDto {
   }
 }
 
-/// Mirrors com.dyplink.sdk.model.TrackConversionParams.
+/// Mirrors com.chumbaq.sdk.model.TrackConversionParams.
 class TrackConversionParamsDto {
   TrackConversionParamsDto({
     required this.eventType,
@@ -408,7 +408,7 @@ class TrackConversionParamsDto {
   }
 }
 
-/// Mirrors com.dyplink.banners.model.Banner.
+/// Mirrors com.chumbaq.banners.model.Banner.
 class BannerDto {
   BannerDto({
     required this.id,
@@ -465,7 +465,7 @@ class BannerDto {
   }
 }
 
-/// Mirrors com.dyplink.banners.model.BannerCategory.
+/// Mirrors com.chumbaq.banners.model.BannerCategory.
 class BannerCategoryDto {
   BannerCategoryDto({
     required this.id,
@@ -532,7 +532,7 @@ class BannerCategoryDto {
   }
 }
 
-/// Mirrors com.dyplink.messages.model.MessageButton.
+/// Mirrors com.chumbaq.messages.model.MessageButton.
 class MessageButtonDto {
   MessageButtonDto({
     required this.id,
@@ -579,7 +579,7 @@ class MessageButtonDto {
   }
 }
 
-/// Mirrors com.dyplink.messages.model.MessageTheme.
+/// Mirrors com.chumbaq.messages.model.MessageTheme.
 class MessageThemeDto {
   MessageThemeDto({
     this.backgroundColor,
@@ -636,7 +636,7 @@ class MessageThemeDto {
   }
 }
 
-/// Mirrors com.dyplink.messages.model.InAppMessage (delivered to the stream,
+/// Mirrors com.chumbaq.messages.model.InAppMessage (delivered to the stream,
 /// not returned from a method call).
 class InAppMessageDto {
   InAppMessageDto({
@@ -717,10 +717,10 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is DyplinkLogLevel) {
+    }    else if (value is ChumbaqLogLevel) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is DyplinkConfigDto) {
+    }    else if (value is ChumbaqConfigDto) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
     }    else if (value is IdentifyParamsDto) {
@@ -763,9 +763,9 @@ class _PigeonCodec extends StandardMessageCodec {
     switch (type) {
       case 129: 
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : DyplinkLogLevel.values[value];
+        return value == null ? null : ChumbaqLogLevel.values[value];
       case 130: 
-        return DyplinkConfigDto.decode(readValue(buffer)!);
+        return ChumbaqConfigDto.decode(readValue(buffer)!);
       case 131: 
         return IdentifyParamsDto.decode(readValue(buffer)!);
       case 132: 
@@ -792,12 +792,12 @@ class _PigeonCodec extends StandardMessageCodec {
   }
 }
 
-/// Core SDK bridge — forwards to `com.dyplink.sdk.Dyplink`.
-class DyplinkHostApi {
-  /// Constructor for [DyplinkHostApi].  The [binaryMessenger] named argument is
+/// Core SDK bridge — forwards to `com.chumbaq.sdk.Chumbaq`.
+class ChumbaqHostApi {
+  /// Constructor for [ChumbaqHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  DyplinkHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  ChumbaqHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : pigeonVar_binaryMessenger = binaryMessenger,
         pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
@@ -806,12 +806,12 @@ class DyplinkHostApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  /// Forwards to `Dyplink.init(context, DyplinkConfig)`. Idempotent.
+  /// Forwards to `Chumbaq.init(context, ChumbaqConfig)`. Idempotent.
   ///
   /// Named `initialize` (not `init`) because `init` is a Swift reserved
   /// keyword that Pigeon's Swift codegen can't escape correctly.
-  Future<void> initialize(DyplinkConfigDto config) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.initialize$pigeonVar_messageChannelSuffix';
+  Future<void> initialize(ChumbaqConfigDto config) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.initialize$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -832,9 +832,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// `Dyplink.isInitialized`.
+  /// `Chumbaq.isInitialized`.
   Future<bool> isInitialized() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.isInitialized$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.isInitialized$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -860,9 +860,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// `Dyplink.distinctId`. Throws `PlatformException(NOT_INITIALIZED)` if not init'd.
+  /// `Chumbaq.distinctId`. Throws `PlatformException(NOT_INITIALIZED)` if not init'd.
   Future<String> distinctId() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.distinctId$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.distinctId$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -888,9 +888,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// `Dyplink.deviceFingerprint`. Throws `PlatformException(NOT_INITIALIZED)` if not init'd.
+  /// `Chumbaq.deviceFingerprint`. Throws `PlatformException(NOT_INITIALIZED)` if not init'd.
   Future<String> deviceFingerprint() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.deviceFingerprint$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.deviceFingerprint$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -916,10 +916,10 @@ class DyplinkHostApi {
     }
   }
 
-  /// Forwards to suspend `Dyplink.identify(params)`.
+  /// Forwards to suspend `Chumbaq.identify(params)`.
   /// Throws `PlatformException` on any failure.
   Future<IdentifyResultDto> identify(IdentifyParamsDto params) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.identify$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.identify$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -945,9 +945,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// Forwards to `Dyplink.track(name, props)`. Fire-and-forget.
+  /// Forwards to `Chumbaq.track(name, props)`. Fire-and-forget.
   Future<void> track(String eventName, Map<String?, Object?>? properties) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.track$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.track$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -968,9 +968,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// Forwards to `Dyplink.trackConversion(params)`.
+  /// Forwards to `Chumbaq.trackConversion(params)`.
   Future<void> trackConversion(TrackConversionParamsDto params) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.trackConversion$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.trackConversion$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -991,9 +991,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// Forwards to `Dyplink.trackRevenue(amount, currency)`.
+  /// Forwards to `Chumbaq.trackRevenue(amount, currency)`.
   Future<void> trackRevenue(double amount, String currency) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.trackRevenue$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.trackRevenue$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1014,9 +1014,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// Forwards to suspend `Dyplink.matchDeferredDeepLink()`.
+  /// Forwards to suspend `Chumbaq.matchDeferredDeepLink()`.
   Future<DeferredMatchResultDto> matchDeferredDeepLink() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.matchDeferredDeepLink$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.matchDeferredDeepLink$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1042,9 +1042,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// `Dyplink.getAttributedShortCode()`.
+  /// `Chumbaq.getAttributedShortCode()`.
   Future<String?> getAttributedShortCode() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.getAttributedShortCode$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.getAttributedShortCode$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1065,9 +1065,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// `Dyplink.getAttributedLinkId()`.
+  /// `Chumbaq.getAttributedLinkId()`.
   Future<String?> getAttributedLinkId() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.getAttributedLinkId$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.getAttributedLinkId$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1088,9 +1088,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// `Dyplink.reset()`.
+  /// `Chumbaq.reset()`.
   Future<void> reset() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.reset$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.reset$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1111,9 +1111,9 @@ class DyplinkHostApi {
     }
   }
 
-  /// Forwards to suspend `Dyplink.flush()`.
+  /// Forwards to suspend `Chumbaq.flush()`.
   Future<void> flush() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.flush$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.flush$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1135,7 +1135,7 @@ class DyplinkHostApi {
   }
 
   Future<void> startDeepLinkStream() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.startDeepLinkStream$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.startDeepLinkStream$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1157,7 +1157,7 @@ class DyplinkHostApi {
   }
 
   Future<void> stopDeepLinkStream() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkHostApi.stopDeepLinkStream$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqHostApi.stopDeepLinkStream$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1179,12 +1179,12 @@ class DyplinkHostApi {
   }
 }
 
-/// Push module bridge — forwards to `com.dyplink.push.DyplinkPush`.
-class DyplinkPushHostApi {
-  /// Constructor for [DyplinkPushHostApi].  The [binaryMessenger] named argument is
+/// Push module bridge — forwards to `com.chumbaq.push.ChumbaqPush`.
+class ChumbaqPushHostApi {
+  /// Constructor for [ChumbaqPushHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  DyplinkPushHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  ChumbaqPushHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : pigeonVar_binaryMessenger = binaryMessenger,
         pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
@@ -1193,10 +1193,10 @@ class DyplinkPushHostApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  /// `DyplinkPush.init(context)`. Requires `DyplinkHostApi.initialize` first.
-  /// Named `initialize` (not `init`) — see [DyplinkHostApi.initialize] for why.
+  /// `ChumbaqPush.init(context)`. Requires `ChumbaqHostApi.initialize` first.
+  /// Named `initialize` (not `init`) — see [ChumbaqHostApi.initialize] for why.
   Future<void> initialize() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.initialize$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqPushHostApi.initialize$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1217,19 +1217,19 @@ class DyplinkPushHostApi {
     }
   }
 
-  /// `DyplinkPush.isInitialized`.
+  /// `ChumbaqPush.isInitialized`.
   ///
   /// Named `isPushInitialized`, not `isInitialized`, because the native
   /// plugin classes implement every HostApi in this file on a single object.
   /// Pigeon turns each HostApi into an interface/protocol, so two of them
   /// declaring `isInitialized(): Bool` collapse to one implementation —
   /// whichever the class writes answers both channels, and the push
-  /// module's own state becomes unreachable. Unlike [DyplinkHostApi.initialize]
+  /// module's own state becomes unreachable. Unlike [ChumbaqHostApi.initialize]
   /// vs [initialize], the signatures here are identical, so there is nothing
   /// for overload resolution to tell apart. The Dart facade still exposes
-  /// this as `DyplinkPush.isInitialized`.
+  /// this as `ChumbaqPush.isInitialized`.
   Future<bool> isPushInitialized() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isPushInitialized$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqPushHostApi.isPushInitialized$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1255,9 +1255,9 @@ class DyplinkPushHostApi {
     }
   }
 
-  /// `DyplinkPush.isRegistered`.
+  /// `ChumbaqPush.isRegistered`.
   Future<bool> isRegistered() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.isRegistered$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqPushHostApi.isRegistered$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1283,9 +1283,9 @@ class DyplinkPushHostApi {
     }
   }
 
-  /// Forwards to suspend `DyplinkPush.registerToken(token)`.
+  /// Forwards to suspend `ChumbaqPush.registerToken(token)`.
   Future<void> registerToken(String token) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.registerToken$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqPushHostApi.registerToken$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1306,15 +1306,15 @@ class DyplinkPushHostApi {
     }
   }
 
-  /// Forwards to suspend `DyplinkPush.registerMiPushToken(regId)`.
+  /// Forwards to suspend `ChumbaqPush.registerMiPushToken(regId)`.
   ///
   /// A vendor channel alongside FCM rather than a replacement for it: MIUI
   /// throttles background FCM, so on Xiaomi devices this is the one that gets
   /// delivered. The host app owns the Mi Push SDK and passes the regId it
-  /// receives; see the native SDK's `DyplinkPush.registerMiPushToken` for the
+  /// receives; see the native SDK's `ChumbaqPush.registerMiPushToken` for the
   /// full contract.
   Future<void> registerMiPushToken(String regId) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.registerMiPushToken$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqPushHostApi.registerMiPushToken$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1335,9 +1335,9 @@ class DyplinkPushHostApi {
     }
   }
 
-  /// Forwards to suspend `DyplinkPush.unregisterToken()`.
+  /// Forwards to suspend `ChumbaqPush.unregisterToken()`.
   Future<void> unregisterToken() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.unregisterToken$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqPushHostApi.unregisterToken$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1359,7 +1359,7 @@ class DyplinkPushHostApi {
   }
 
   Future<void> startTokenStream() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.startTokenStream$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqPushHostApi.startTokenStream$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1381,7 +1381,7 @@ class DyplinkPushHostApi {
   }
 
   Future<void> stopTokenStream() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkPushHostApi.stopTokenStream$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqPushHostApi.stopTokenStream$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1403,12 +1403,12 @@ class DyplinkPushHostApi {
   }
 }
 
-/// Banners module bridge — forwards to `com.dyplink.banners.DyplinkBanners`.
-class DyplinkBannersHostApi {
-  /// Constructor for [DyplinkBannersHostApi].  The [binaryMessenger] named argument is
+/// Banners module bridge — forwards to `com.chumbaq.banners.ChumbaqBanners`.
+class ChumbaqBannersHostApi {
+  /// Constructor for [ChumbaqBannersHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  DyplinkBannersHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  ChumbaqBannersHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : pigeonVar_binaryMessenger = binaryMessenger,
         pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
@@ -1417,9 +1417,9 @@ class DyplinkBannersHostApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  /// Forwards to suspend `DyplinkBanners.loadBanners(categoryId)`.
+  /// Forwards to suspend `ChumbaqBanners.loadBanners(categoryId)`.
   Future<BannerCategoryDto> loadBanners(String categoryId) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkBannersHostApi.loadBanners$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqBannersHostApi.loadBanners$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1445,9 +1445,9 @@ class DyplinkBannersHostApi {
     }
   }
 
-  /// `DyplinkBanners.clearCache()`.
+  /// `ChumbaqBanners.clearCache()`.
   Future<void> clearCache() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkBannersHostApi.clearCache$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqBannersHostApi.clearCache$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1469,12 +1469,12 @@ class DyplinkBannersHostApi {
   }
 }
 
-/// In-app messages bridge — forwards to `com.dyplink.messages.DyplinkMessages`.
-class DyplinkMessagesHostApi {
-  /// Constructor for [DyplinkMessagesHostApi].  The [binaryMessenger] named argument is
+/// In-app messages bridge — forwards to `com.chumbaq.messages.ChumbaqMessages`.
+class ChumbaqMessagesHostApi {
+  /// Constructor for [ChumbaqMessagesHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  DyplinkMessagesHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  ChumbaqMessagesHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : pigeonVar_binaryMessenger = binaryMessenger,
         pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
@@ -1483,9 +1483,9 @@ class DyplinkMessagesHostApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  /// `DyplinkMessages.onAppOpen(context)`.
+  /// `ChumbaqMessages.onAppOpen(context)`.
   Future<void> onAppOpen() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkMessagesHostApi.onAppOpen$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqMessagesHostApi.onAppOpen$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1506,9 +1506,9 @@ class DyplinkMessagesHostApi {
     }
   }
 
-  /// `DyplinkMessages.onScreenView(context, screen)`.
+  /// `ChumbaqMessages.onScreenView(context, screen)`.
   Future<void> onScreenView(String screen) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkMessagesHostApi.onScreenView$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqMessagesHostApi.onScreenView$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1529,9 +1529,9 @@ class DyplinkMessagesHostApi {
     }
   }
 
-  /// `DyplinkMessages.onEvent(context, event)`.
+  /// `ChumbaqMessages.onEvent(context, event)`.
   Future<void> onEvent(String event) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkMessagesHostApi.onEvent$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqMessagesHostApi.onEvent$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1553,7 +1553,7 @@ class DyplinkMessagesHostApi {
   }
 
   Future<void> startMessageEventStream() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkMessagesHostApi.startMessageEventStream$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqMessagesHostApi.startMessageEventStream$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1575,7 +1575,7 @@ class DyplinkMessagesHostApi {
   }
 
   Future<void> stopMessageEventStream() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.dyplink.DyplinkMessagesHostApi.stopMessageEventStream$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.chumbaq.ChumbaqMessagesHostApi.stopMessageEventStream$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

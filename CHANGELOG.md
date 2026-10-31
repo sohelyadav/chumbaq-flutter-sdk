@@ -1,57 +1,57 @@
 ## 0.0.1
 
-First release. A Flutter wrapper over the native Dyplink SDKs — the
+First release. A Flutter wrapper over the native Chumbaq SDKs — the
 offline event queue, session tracking, HTTP retries, install-referrer
 parsing and FCM integration all stay in native code, so a Flutter app
 behaves the same as a native one.
 
 **Android and iOS.** Every module forwards to the native SDK on both
 platforms. Three members stay Android-only and throw `UnsupportedError` on
-iOS rather than answering emptily — `DyplinkPush.tokens` (APNs hands the
+iOS rather than answering emptily — `ChumbaqPush.tokens` (APNs hands the
 device token to the host app, not to the plugin), `registerMiPushToken` (a
-Xiaomi channel) and `DyplinkBannerCarousel` (the PlatformView hosts
+Xiaomi channel) and `ChumbaqBannerCarousel` (the PlatformView hosts
 Android's native view). Calls on web and desktop throw, except for the
 members listed in the README's platform-support table.
 
 ### iOS packaging — breaking, deliberate
 
-* **`ios/dyplink.podspec` is gone; the iOS plugin is a Swift package**
-  (`ios/dyplink/Package.swift`). Nothing to enable on Flutter 3.44+, where
+* **`ios/chumbaq.podspec` is gone; the iOS plugin is a Swift package**
+  (`ios/chumbaq/Package.swift`). Nothing to enable on Flutter 3.44+, where
   Swift Package Manager is on by default; an older Flutter needs
   `flutter config --enable-swift-package-manager`. The native iOS SDK ships
   as a Swift package with no CocoaPods spec, so a pod cannot depend on it: a
-  podspec would have left the plugin failing at `import DyplinkCore` with
+  podspec would have left the plugin failing at `import ChumbaqCore` with
   "no such module", where having none makes Flutter say *"The following
   plugin(s) are only compatible with Swift Package Manager"* and name the
   fix. The podspec that was removed was unmodified `flutter create`
   boilerplate.
-* Swift sources moved from `ios/Classes/` to `ios/dyplink/Sources/dyplink/`,
+* Swift sources moved from `ios/Classes/` to `ios/chumbaq/Sources/chumbaq/`,
   the layout Flutter's SPM support requires. Pigeon's `swiftOut` follows.
 * **Minimum iOS is 14.0**, level with the native SDK, where the removed
   podspec said 13.0. Flutter 3.47 migrates host projects to a deployment
   target of 15.0 anyway, so an app on a current Flutter is unaffected; an
   app pinned to iOS 13 is not supported.
 * Like Android's `mavenLocal()` arrangement, the iOS build resolves the
-  native SDK from a sibling checkout of `dyplink-ios-sdk`. Neither platform
+  native SDK from a sibling checkout of `chumbaq-ios-sdk`. Neither platform
   is installable from pub.dev until the native SDKs are published.
 
 ### Deep links and attribution
 
-* `Dyplink.init`, `identify`, `track`, `trackConversion`, `trackRevenue`,
+* `Chumbaq.init`, `identify`, `track`, `trackConversion`, `trackRevenue`,
   `reset` and `flush`, forwarding to the native core SDK.
-* `Dyplink.deepLinks` — a broadcast stream of direct and deferred links. The
+* `Chumbaq.deepLinks` — a broadcast stream of direct and deferred links. The
   native listener attaches on first subscribe and detaches on last cancel.
 * `matchDeferredDeepLink`, `getAttributedShortCode` and
   `getAttributedLinkId` for claiming the click that led to an install.
-* A typed error hierarchy — `DyplinkNotInitialized`, `DyplinkInvalidConfig`,
-  `DyplinkNetworkError`, `DyplinkApiError`, `DyplinkUnknownError` — mapped
+* A typed error hierarchy — `ChumbaqNotInitialized`, `ChumbaqInvalidConfig`,
+  `ChumbaqNetworkError`, `ChumbaqApiError`, `ChumbaqUnknownError` — mapped
   from the native codes rather than surfaced as raw `PlatformException`s.
 
 ### Push notifications
 
-* `DyplinkPush.init`, `registerToken`, `registerMiPushToken`,
+* `ChumbaqPush.init`, `registerToken`, `registerMiPushToken`,
   `unregisterToken`, `isInitialized` and `isRegistered`.
-* `DyplinkPush.tokens` — a broadcast stream of Firebase token refreshes.
+* `ChumbaqPush.tokens` — a broadcast stream of Firebase token refreshes.
   Android only; see the platform note above.
 * Engagement reporting for all four event types the backend accepts:
   `reportNotificationReceived` (delivered), `reportNotificationImpression`,
@@ -70,17 +70,17 @@ members listed in the README's platform-support table.
 
 ### In-app messages and banners
 
-* `DyplinkMessages.onAppOpen`, `onScreenView` and `onEvent` as trigger
+* `ChumbaqMessages.onAppOpen`, `onScreenView` and `onEvent` as trigger
   points, plus an `events` stream of lifecycle, button and custom events.
   The native SDK draws the message, so there is no Flutter widget to place.
-* `DyplinkBanners.loadBanners` and `clearCache`, and
-  `DyplinkBannerCarousel` — a `PlatformView` hosting the native carousel so
-  it matches native Dyplink banners exactly. The widget is Android-only and
+* `ChumbaqBanners.loadBanners` and `clearCache`, and
+  `ChumbaqBannerCarousel` — a `PlatformView` hosting the native carousel so
+  it matches native Chumbaq banners exactly. The widget is Android-only and
   renders nothing on iOS; `loadBanners` works on both.
 
 ### Diagnostics
 
-* `DyplinkDiagnostics`, off by default. Almost nothing in this package
+* `ChumbaqDiagnostics`, off by default. Almost nothing in this package
   throws at its caller, which means a misconfigured integration looks like a
   working one. Turning this on reports the failures and skips those paths
   otherwise swallow. No API key, push token or device fingerprint is ever

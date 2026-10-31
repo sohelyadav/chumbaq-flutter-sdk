@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="dyplink_example"
+        android:label="chumbaq_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -25,20 +25,20 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-            <!-- Custom URI scheme deep links: dyplinkexample://... -->
+            <!-- Custom URI scheme deep links: chumbaqexample://... -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="dyplinkexample"/>
+                <data android:scheme="chumbaqexample"/>
             </intent-filter>
 
-            <!-- Android App Links: https://example.dyplink.com/... -->
+            <!-- Android App Links: https://example.chumbaq.com/... -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https" android:host="example.dyplink.com"/>
+                <data android:scheme="https" android:host="example.chumbaq.com"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

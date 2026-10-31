@@ -7,18 +7,18 @@
 
           Both are registered for com.google.firebase.MESSAGING_EVENT, and
           Firebase binds whichever service the merged manifest happens to
-          list first — so leaving both in place would make `DyplinkPush.tokens`
+          list first — so leaving both in place would make `ChumbaqPush.tokens`
           work or not work depending on merge order. Removing the base one
           makes the choice explicit. Nothing is lost: the subclass calls
           through to it, so backend token registration, `delivered` reporting
           and the default notification all still happen.
         -->
         <service
-            android:name="com.dyplink.push.DyplinkMessagingService"
+            android:name="com.chumbaq.push.ChumbaqMessagingService"
             tools:node="remove" />
 
         <service
-            android:name="com.dyplink.dyplink.DyplinkFlutterMessagingService"
+            android:name="com.chumbaq.chumbaq.ChumbaqFlutterMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

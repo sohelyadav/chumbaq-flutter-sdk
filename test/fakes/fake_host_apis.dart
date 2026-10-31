@@ -9,7 +9,7 @@
 // Each can be told to throw a PlatformException instead, which is how the
 // swallowed stream-lifecycle paths are driven.
 
-import 'package:dyplink/src/pigeon.g.dart' as pg;
+import 'package:chumbaq/src/pigeon.g.dart' as pg;
 import 'package:flutter/services.dart';
 
 /// Shared bookkeeping: what was called, and what should fail.
@@ -27,7 +27,7 @@ mixin _RecordsCalls {
   }
 }
 
-class FakeDyplinkHostApi extends pg.DyplinkHostApi with _RecordsCalls {
+class FakeChumbaqHostApi extends pg.ChumbaqHostApi with _RecordsCalls {
   bool initialized = false;
   String distinct = 'distinct-1';
   String fingerprint = 'fingerprint-1';
@@ -37,7 +37,7 @@ class FakeDyplinkHostApi extends pg.DyplinkHostApi with _RecordsCalls {
       pg.DeferredMatchResultDto(matched: false);
 
   @override
-  Future<void> initialize(pg.DyplinkConfigDto config) async {
+  Future<void> initialize(pg.ChumbaqConfigDto config) async {
     record('initialize');
     initialized = true;
   }
@@ -119,7 +119,7 @@ class FakeDyplinkHostApi extends pg.DyplinkHostApi with _RecordsCalls {
   Future<void> stopDeepLinkStream() async => record('stopDeepLinkStream');
 }
 
-class FakePushHostApi extends pg.DyplinkPushHostApi with _RecordsCalls {
+class FakePushHostApi extends pg.ChumbaqPushHostApi with _RecordsCalls {
   bool pushInitialized = false;
   bool registered = false;
 
@@ -158,7 +158,7 @@ class FakePushHostApi extends pg.DyplinkPushHostApi with _RecordsCalls {
   Future<void> stopTokenStream() async => record('stopTokenStream');
 }
 
-class FakeBannersHostApi extends pg.DyplinkBannersHostApi with _RecordsCalls {
+class FakeBannersHostApi extends pg.ChumbaqBannersHostApi with _RecordsCalls {
   @override
   Future<pg.BannerCategoryDto> loadBanners(String categoryId) async {
     record('loadBanners:$categoryId');
@@ -185,7 +185,7 @@ class FakeBannersHostApi extends pg.DyplinkBannersHostApi with _RecordsCalls {
   Future<void> clearCache() async => record('clearCache');
 }
 
-class FakeMessagesHostApi extends pg.DyplinkMessagesHostApi with _RecordsCalls {
+class FakeMessagesHostApi extends pg.ChumbaqMessagesHostApi with _RecordsCalls {
   @override
   Future<void> onAppOpen() async => record('onAppOpen');
 
