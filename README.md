@@ -1,6 +1,6 @@
 # Chumbaq Flutter SDK
 
-Deep linking, deferred deep links, attribution, events, in-app messages,
+Deep linking, deferred deep links, events, in-app messages,
 banners, and push notifications for Chumbaq.
 
 ## Platform support
