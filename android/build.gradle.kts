@@ -1,12 +1,11 @@
 group = "com.chumbaq.chumbaq"
-version = "0.0.1"
+version = "0.1.0"
 
 buildscript {
     val kotlinVersion = "2.2.20"
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
     }
 
     dependencies {
@@ -19,17 +18,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // Pulls the locally-published chumbaq-android-sdk artifacts.
-        //
-        // DEV WORKFLOW: before running the example app or a consumer app,
-        // publish the native SDK to ~/.m2 via:
-        //
-        //   cd ../../chumbaq-android-sdk
-        //   ./gradlew publishToMavenLocal
-        //
-        // Once chumbaq-android-sdk is published to Maven Central this
-        // mavenLocal() entry can be removed.
-        mavenLocal()
     }
 }
 
@@ -81,8 +69,7 @@ android {
 }
 
 dependencies {
-    // ── Native Chumbaq SDK (pulled from mavenLocal during dev) ──────────────
-    // See the `mavenLocal()` note above for publishing instructions.
+    // ── Native Chumbaq SDK, from Maven Central ──────────────────────────────
     //
     // The group is `com.chumbaq`, matching the native SDK's own
     // gradle.properties and its README. Keep the two in step: a stale group

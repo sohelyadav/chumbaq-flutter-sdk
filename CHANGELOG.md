@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.1.0
 
 First release. A Flutter wrapper over the native Chumbaq SDKs — the
 offline event queue, session tracking, HTTP retries, install-referrer
@@ -31,9 +31,9 @@ members listed in the README's platform-support table.
   podspec said 13.0. Flutter 3.47 migrates host projects to a deployment
   target of 15.0 anyway, so an app on a current Flutter is unaffected; an
   app pinned to iOS 13 is not supported.
-* Like Android's `mavenLocal()` arrangement, the iOS build resolves the
-  native SDK from a sibling checkout of `chumbaq-ios-sdk`. Neither platform
-  is installable from pub.dev until the native SDKs are published.
+* Builds against the published native SDKs: `com.chumbaq:*:0.1.0` from
+  Maven Central on Android, and `chumbaq-ios-sdk` 0.1.0 through Swift Package
+  Manager on iOS.
 
 ### Deep links and attribution
 

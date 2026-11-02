@@ -5,10 +5,10 @@ banners, and push notifications for Chumbaq.
 
 ## Platform support
 
-Android and iOS. Neither is installable from pub.dev yet: both build against
-a local checkout of their native SDK, so adding the dependency is not the
-whole story — see [iOS setup](#ios-setup) for the two requirements there,
-and `android/build.gradle.kts` for the `mavenLocal()` equivalent.
+Android and iOS. The plugin pulls in the published native SDKs — from Maven
+Central on Android and through Swift Package Manager on iOS — so there is
+nothing to check out alongside it. iOS has one requirement; see
+[iOS setup](#ios-setup).
 
 Anything that needs the native SDK throws `UnsupportedError` on web and
 desktop, with a message saying so, rather than failing quietly. Five members
@@ -48,15 +48,8 @@ To watch any of these do nothing, turn on [diagnostics](#diagnostics).
 
 ## iOS setup
 
-> **iOS is not installable from pub.dev yet.** The plugin builds against a
-> *sibling checkout* of the native SDK, because `chumbaq-ios-sdk` is not
-> published and has no release tag — the same arrangement as Android, which
-> pulls the native SDK from `mavenLocal()`. Until both SDKs are published,
-> iOS support is usable from a Chumbaq workspace checkout, not from
-> `flutter pub add chumbaq`. See [requirement 2](#2-a-sibling-checkout-of-the-native-ios-sdk).
-
-Two hard requirements. Both fail the build if unmet, and the first one fails
-it before any of your code is compiled.
+One hard requirement. It fails the build if unmet, before any of your code is
+compiled.
 
 ### 1. Swift Package Manager
 
@@ -81,20 +74,6 @@ reason rather than a confusing `no such module 'ChumbaqCore'` later:
 The following plugin(s) are only compatible with Swift Package Manager:
   - chumbaq
 ```
-
-### 2. A sibling checkout of the native iOS SDK
-
-```
-chumbaq/
-  chumbaq-flutter-sdk/   <- this repo
-  chumbaq-ios-sdk/       <- the native SDK, checked out beside it
-```
-
-`ios/chumbaq/Package.swift` resolves the SDK from that path. If it is not
-there, package resolution fails with a message naming the directory it
-looked in — it does not fall back to a stale or partial build. Point the
-manifest somewhere else if your layout differs; swap it for
-`.package(url:, from:)` once the SDK is published.
 
 Minimum iOS: **14.0**, level with the native SDK. Flutter 3.47 itself
 migrates host projects to a deployment target of 15.0, so in practice your
@@ -145,7 +124,7 @@ func application(
 
 ```yaml
 dependencies:
-  chumbaq: ^0.0.1
+  chumbaq: ^0.1.0
 ```
 
 ## Getting started

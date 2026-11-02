@@ -1,6 +1,6 @@
 name: chumbaq
 description: "Chumbaq Flutter SDK — deep linking, attribution, events, push, banners, and in-app messages"
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/sohelyadav/chumbaq-flutter-sdk
 repository: https://github.com/sohelyadav/chumbaq-flutter-sdk
 issue_tracker: https://github.com/sohelyadav/chumbaq-flutter-sdk/issues
