@@ -343,4 +343,6 @@ or a device fingerprint, so a report is safe to paste into an issue.
 
 ## License
 
-TBD
+Copyright 2026 The Chumbaq Authors.
+
+Licensed under the [Apache License, Version 2.0](LICENSE).
