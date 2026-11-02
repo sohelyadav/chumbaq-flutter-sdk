@@ -14,62 +14,12 @@
 //
 // See README.md ("iOS setup") for the host-app side.
 
-import Foundation
 import PackageDescription
 
-// ── Native SDK location ──────────────────────────────────────────────────────
+// ── Native SDK ───────────────────────────────────────────────────────────────
 //
-// The iOS SDK is consumed from the sibling checkout in the Chumbaq workspace
-// — the iOS counterpart of the Android bridge's `mavenLocal()` arrangement
-// (see android/build.gradle.kts), and for the same reason: the native SDK is
-// not published yet. chumbaq-ios-sdk has no tagged release, so a
-// `.package(url:, from:)` dependency could not resolve at all.
-//
-// DEV WORKFLOW: check out chumbaq-ios-sdk next to chumbaq-flutter-sdk:
-//
-//   chumbaq/
-//     chumbaq-flutter-sdk/   <- this repo
-//     chumbaq-ios-sdk/       <- native SDK
-//
-// Once chumbaq-ios-sdk publishes a tag, replace the `.package(path:)` below
-// with:
-//
-//   .package(url: "https://github.com/sohelyadav/chumbaq-ios-sdk.git", from: "0.1.0")
-//
-// `resolvingSymlinksInPath` matters: Flutter symlinks this package into the
-// host app's `ios/Flutter/ephemeral/Packages/.packages/chumbaq`, and SwiftPM
-// resolves relative dependency paths against that symlink rather than against
-// this file's real location.
-let manifestDirectory = URL(fileURLWithPath: #filePath)
-  .resolvingSymlinksInPath()
-  .deletingLastPathComponent()
-
-let nativeSdkDirectory =
-  manifestDirectory  // <repo>/ios/chumbaq
-  .deletingLastPathComponent()  // <repo>/ios
-  .deletingLastPathComponent()  // <repo>
-  .deletingLastPathComponent()  // the workspace holding both repos
-  .appendingPathComponent("chumbaq-ios-sdk")
-
-if !FileManager.default.fileExists(
-  atPath: nativeSdkDirectory.appendingPathComponent("Package.swift").path)
-{
-  // Fails manifest evaluation rather than the compile that would follow,
-  // so the message names the actual problem.
-  fatalError(
-    """
-    The Chumbaq iOS SDK was not found at \(nativeSdkDirectory.path).
-
-    The Flutter plugin builds against a sibling checkout of chumbaq-ios-sdk:
-
-      chumbaq/
-        chumbaq-flutter-sdk/
-        chumbaq-ios-sdk/
-
-    Clone it there, or edit ios/chumbaq/Package.swift to point at your copy.
-    """
-  )
-}
+// The published chumbaq-ios-sdk, by tag. Keep `from:` in step with the
+// Android side's `chumbaqSdkVersion` in android/build.gradle.kts.
 
 let package = Package(
   name: "chumbaq",
@@ -86,11 +36,11 @@ let package = Package(
   ],
   dependencies: [
     .package(name: "FlutterFramework", path: "../FlutterFramework"),
-    // No `name:` — SwiftPM derives this dependency's identity from the
-    // directory ("chumbaq-ios-sdk"), and naming it "Chumbaq" as well would
-    // alias a second identity onto the same package, which collides with
-    // this package's own identity once Flutter symlinks it into the host app.
-    .package(path: nativeSdkDirectory.path),
+    // No `name:` — SwiftPM derives this dependency's identity from the URL
+    // ("chumbaq-ios-sdk"), and naming it "Chumbaq" as well would alias a
+    // second identity onto the same package, which collides with this
+    // package's own identity once Flutter symlinks it into the host app.
+    .package(url: "https://github.com/sohelyadav/chumbaq-ios-sdk.git", from: "0.1.0"),
   ],
   targets: [
     .target(

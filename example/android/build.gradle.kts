@@ -2,10 +2,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // Required so the example app can resolve the native chumbaq-android-sdk
-        // modules that the plugin depends on. Before running the example, publish
-        // the native SDK via:  (cd ../../chumbaq-android-sdk && ./gradlew publishToMavenLocal)
-        mavenLocal()
     }
 }
 
