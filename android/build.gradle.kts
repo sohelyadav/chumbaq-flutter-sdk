@@ -84,16 +84,16 @@ dependencies {
     // ── Native Chumbaq SDK (pulled from mavenLocal during dev) ──────────────
     // See the `mavenLocal()` note above for publishing instructions.
     //
-    // The group is `in.chumbaq`, matching the native SDK's own
+    // The group is `com.chumbaq`, matching the native SDK's own
     // gradle.properties and its README. Keep the two in step: a stale group
     // here can still resolve on a machine with an old artifact in ~/.m2, so
     // the build silently compiles against an outdated copy of the SDK while
     // a clean checkout just fails to resolve.
     val chumbaqSdkVersion = "0.1.0"
-    api("in.chumbaq:chumbaq-core:$chumbaqSdkVersion")
-    api("in.chumbaq:chumbaq-push:$chumbaqSdkVersion")
-    api("in.chumbaq:chumbaq-banners:$chumbaqSdkVersion")
-    api("in.chumbaq:chumbaq-messages:$chumbaqSdkVersion")
+    api("com.chumbaq:chumbaq-core:$chumbaqSdkVersion")
+    api("com.chumbaq:chumbaq-push:$chumbaqSdkVersion")
+    api("com.chumbaq:chumbaq-banners:$chumbaqSdkVersion")
+    api("com.chumbaq:chumbaq-messages:$chumbaqSdkVersion")
 
     // ── Coroutines (needed to bridge suspend SDK methods into Pigeon callbacks)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
