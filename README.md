@@ -315,6 +315,62 @@ Reports go to `debugPrint`. Send them somewhere else with
 `ChumbaqDiagnostics.sink`. Nothing logged carries an API key, a push token
 or a device fingerprint, so a report is safe to paste into an issue.
 
+## Privacy: consent, do-not-track, deletion and export
+
+These controls help you comply with India's DPDP Act.
+
+### Consent and do-not-track
+
+Consent travels with `identify`; a field you leave unset changes nothing on
+the server.
+
+```dart
+await Chumbaq.instance.identify(
+  IdentifyParams.builder()
+      .externalUserId('u_42')
+      .pushOptIn(false)   // no push to this device
+      .emailOptIn(true)
+      .smsOptIn(false)
+      .doNotTrack(true)   // stop storing behavioural data from this device
+      .build(),
+);
+```
+
+- `pushOptIn(false)` makes every push send skip this device. Left unset, push
+  is allowed and the OS notification permission governs.
+- `doNotTrack(true)` stops the server storing events, sessions, location and
+  campaign sources for this device. It still answers 2xx, so the native
+  offline queue does not retry. It does not block messages; the channel
+  opt-ins decide those.
+- It covers this device only. A person-wide objection is an owner action in
+  the dashboard API, and the SDK cannot lift that, or any do-not-track set from
+  the dashboard, with `doNotTrack(false)`.
+- Every consent change is recorded with its source.
+- Known gaps: there is no dedicated consent call (a change needs another
+  `identify`); the SDK keeps sending events while do-not-track is on (the
+  server drops them); it does not report the notification permission as
+  `pushOptIn`, and does not send `whatsappOptIn` yet.
+
+### Deleting or exporting a user's data
+
+There is no SDK call for this, on purpose: the API key ships inside the app,
+so anyone can extract it. Have your backend call the server API with a key
+created with the server-only `privacy` permission. Never put that key in an
+app; SDK routes refuse it.
+
+```sh
+curl -X POST https://your-chumbaq-host/api/privacy/erasures \
+  -H 'x-api-key: <privacy key>' -H 'content-type: application/json' \
+  -d '{"externalUserId": "u_42"}'
+```
+
+`POST /api/privacy/exports` takes the same body and returns the user's data.
+For an anonymous device, send `{"deviceFingerprint": "..."}` (from
+`await Chumbaq.instance.deviceFingerprint`) instead. Records that cannot be
+tied to one person are kept; the response lists them in `notErased`
+(`notIncluded` for exports). After deleting a user, call
+`await Chumbaq.instance.reset()` on the device so it stops sending their id.
+
 ## Related SDKs
 
 - [iOS SDK](https://github.com/sohelyadav/chumbaq-ios-sdk)
