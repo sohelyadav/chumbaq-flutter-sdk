@@ -5,6 +5,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Push needs a Firebase config. google-services.json is gitignored, so the plugin is
+// applied only when one has been dropped into android/app/; without it the example
+// still builds and runs, just with push turned off.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.chumbaq.chumbaq_example"
     compileSdk = flutter.compileSdkVersion

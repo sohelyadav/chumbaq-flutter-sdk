@@ -371,6 +371,30 @@ tied to one person are kept; the response lists them in `notErased`
 (`notIncluded` for exports). After deleting a user, call
 `await Chumbaq.instance.reset()` on the device so it stops sending their id.
 
+## Running the example app
+
+`example/` uses every part of the plugin. Point it at a Chumbaq platform with
+`--dart-define`; nothing has to be edited or committed:
+
+```sh
+cd example
+flutter run \
+  --dart-define=CHUMBAQ_BASE_URL=http://10.0.2.2:3000 \
+  --dart-define=CHUMBAQ_API_KEY=<project API key> \
+  --dart-define=CHUMBAQ_PROJECT_ID=<project id>
+```
+
+`10.0.2.2` is the Android emulator's address for your machine. On a device over USB,
+run `adb reverse tcp:3000 tcp:3000` and use `http://localhost:3000`. Plain HTTP is
+allowed for these local addresses in Android debug builds only.
+
+For push on Android, add an Android app with package `com.chumbaq.chumbaq_example` to
+a Firebase project, put its `google-services.json` in `example/android/app/`
+(gitignored), and upload that project's service account key in the Chumbaq dashboard.
+Without the file the example still builds, with push turned off. Use an emulator
+image with Google Play, which FCM needs. iOS push also needs an APNs key from an
+Apple Developer account.
+
 ## Related SDKs
 
 - [iOS SDK](https://github.com/sohelyadav/chumbaq-ios-sdk)
