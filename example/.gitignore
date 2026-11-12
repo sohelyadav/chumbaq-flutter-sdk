@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase config for push testing: each developer uses their own project
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist

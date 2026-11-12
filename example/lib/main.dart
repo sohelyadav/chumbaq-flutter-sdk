@@ -92,10 +92,10 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Replace with your real credentials from the Chumbaq dashboard, or pass
     // them at launch so nothing has to be edited in (or committed to) this
-    // file:
+    // file (10.0.2.2 is the Android emulator's address for your machine):
     //
     //   flutter run \
-    //     --dart-define=CHUMBAQ_BASE_URL=http://localhost:3010 \
+    //     --dart-define=CHUMBAQ_BASE_URL=http://10.0.2.2:3000 \
     //     --dart-define=CHUMBAQ_API_KEY=... \
     //     --dart-define=CHUMBAQ_PROJECT_ID=...
     final config = ChumbaqConfig.builder(
