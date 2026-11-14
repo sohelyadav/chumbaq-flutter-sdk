@@ -113,6 +113,7 @@ class IdentifyParamsDto {
   IdentifyParamsDto({
     this.distinctId,
     this.externalUserId,
+    this.userHash,
     this.firstName,
     this.lastName,
     this.phone,
@@ -139,6 +140,9 @@ class IdentifyParamsDto {
   String? distinctId;
 
   String? externalUserId;
+
+  /// HMAC-SHA256 of [externalUserId] under the project's identity secret, made server-side.
+  String? userHash;
 
   String? firstName;
 
@@ -186,6 +190,7 @@ class IdentifyParamsDto {
     return <Object?>[
       distinctId,
       externalUserId,
+      userHash,
       firstName,
       lastName,
       phone,
@@ -215,27 +220,28 @@ class IdentifyParamsDto {
     return IdentifyParamsDto(
       distinctId: result[0] as String?,
       externalUserId: result[1] as String?,
-      firstName: result[2] as String?,
-      lastName: result[3] as String?,
-      phone: result[4] as String?,
-      avatar: result[5] as String?,
-      locale: result[6] as String?,
-      language: result[7] as String?,
-      appVersion: result[8] as String?,
-      appBuild: result[9] as String?,
-      traits: (result[10] as Map<Object?, Object?>?)?.cast<String?, Object?>(),
-      utmSource: result[11] as String?,
-      utmMedium: result[12] as String?,
-      utmCampaign: result[13] as String?,
-      utmContent: result[14] as String?,
-      utmTerm: result[15] as String?,
-      installSource: result[16] as String?,
-      installCampaign: result[17] as String?,
-      emailOptIn: result[18] as bool?,
-      smsOptIn: result[19] as bool?,
-      pushOptIn: result[20] as bool?,
-      gdprConsent: result[21] as bool?,
-      doNotTrack: result[22] as bool?,
+      userHash: result[2] as String?,
+      firstName: result[3] as String?,
+      lastName: result[4] as String?,
+      phone: result[5] as String?,
+      avatar: result[6] as String?,
+      locale: result[7] as String?,
+      language: result[8] as String?,
+      appVersion: result[9] as String?,
+      appBuild: result[10] as String?,
+      traits: (result[11] as Map<Object?, Object?>?)?.cast<String?, Object?>(),
+      utmSource: result[12] as String?,
+      utmMedium: result[13] as String?,
+      utmCampaign: result[14] as String?,
+      utmContent: result[15] as String?,
+      utmTerm: result[16] as String?,
+      installSource: result[17] as String?,
+      installCampaign: result[18] as String?,
+      emailOptIn: result[19] as bool?,
+      smsOptIn: result[20] as bool?,
+      pushOptIn: result[21] as bool?,
+      gdprConsent: result[22] as bool?,
+      doNotTrack: result[23] as bool?,
     );
   }
 }

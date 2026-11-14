@@ -798,6 +798,7 @@ extension IdentifyParamsDto {
     let b = IdentifyParams.Builder()
     if let distinctId { b.distinctId(distinctId) }
     if let externalUserId { b.externalUserId(externalUserId) }
+    if let userHash { b.userHash(userHash) }
     if let firstName { b.firstName(firstName) }
     if let lastName { b.lastName(lastName) }
     if let phone { b.phone(phone) }

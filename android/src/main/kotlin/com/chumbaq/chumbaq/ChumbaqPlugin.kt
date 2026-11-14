@@ -442,6 +442,7 @@ private fun IdentifyParamsDto.toNativeParams(): IdentifyParams {
     val b = IdentifyParams.Builder()
     distinctId?.let { b.distinctId(it) }
     externalUserId?.let { b.externalUserId(it) }
+    userHash?.let { b.userHash(it) }
     firstName?.let { b.firstName(it) }
     lastName?.let { b.lastName(it) }
     phone?.let { b.phone(it) }

@@ -131,6 +131,8 @@ data class ChumbaqConfigDto (
 data class IdentifyParamsDto (
   val distinctId: String? = null,
   val externalUserId: String? = null,
+  /** HMAC-SHA256 of [externalUserId] under the project's identity secret, made server-side. */
+  val userHash: String? = null,
   val firstName: String? = null,
   val lastName: String? = null,
   val phone: String? = null,
@@ -158,34 +160,36 @@ data class IdentifyParamsDto (
     fun fromList(pigeonVar_list: List<Any?>): IdentifyParamsDto {
       val distinctId = pigeonVar_list[0] as String?
       val externalUserId = pigeonVar_list[1] as String?
-      val firstName = pigeonVar_list[2] as String?
-      val lastName = pigeonVar_list[3] as String?
-      val phone = pigeonVar_list[4] as String?
-      val avatar = pigeonVar_list[5] as String?
-      val locale = pigeonVar_list[6] as String?
-      val language = pigeonVar_list[7] as String?
-      val appVersion = pigeonVar_list[8] as String?
-      val appBuild = pigeonVar_list[9] as String?
-      val traits = pigeonVar_list[10] as Map<String?, Any?>?
-      val utmSource = pigeonVar_list[11] as String?
-      val utmMedium = pigeonVar_list[12] as String?
-      val utmCampaign = pigeonVar_list[13] as String?
-      val utmContent = pigeonVar_list[14] as String?
-      val utmTerm = pigeonVar_list[15] as String?
-      val installSource = pigeonVar_list[16] as String?
-      val installCampaign = pigeonVar_list[17] as String?
-      val emailOptIn = pigeonVar_list[18] as Boolean?
-      val smsOptIn = pigeonVar_list[19] as Boolean?
-      val pushOptIn = pigeonVar_list[20] as Boolean?
-      val gdprConsent = pigeonVar_list[21] as Boolean?
-      val doNotTrack = pigeonVar_list[22] as Boolean?
-      return IdentifyParamsDto(distinctId, externalUserId, firstName, lastName, phone, avatar, locale, language, appVersion, appBuild, traits, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, installSource, installCampaign, emailOptIn, smsOptIn, pushOptIn, gdprConsent, doNotTrack)
+      val userHash = pigeonVar_list[2] as String?
+      val firstName = pigeonVar_list[3] as String?
+      val lastName = pigeonVar_list[4] as String?
+      val phone = pigeonVar_list[5] as String?
+      val avatar = pigeonVar_list[6] as String?
+      val locale = pigeonVar_list[7] as String?
+      val language = pigeonVar_list[8] as String?
+      val appVersion = pigeonVar_list[9] as String?
+      val appBuild = pigeonVar_list[10] as String?
+      val traits = pigeonVar_list[11] as Map<String?, Any?>?
+      val utmSource = pigeonVar_list[12] as String?
+      val utmMedium = pigeonVar_list[13] as String?
+      val utmCampaign = pigeonVar_list[14] as String?
+      val utmContent = pigeonVar_list[15] as String?
+      val utmTerm = pigeonVar_list[16] as String?
+      val installSource = pigeonVar_list[17] as String?
+      val installCampaign = pigeonVar_list[18] as String?
+      val emailOptIn = pigeonVar_list[19] as Boolean?
+      val smsOptIn = pigeonVar_list[20] as Boolean?
+      val pushOptIn = pigeonVar_list[21] as Boolean?
+      val gdprConsent = pigeonVar_list[22] as Boolean?
+      val doNotTrack = pigeonVar_list[23] as Boolean?
+      return IdentifyParamsDto(distinctId, externalUserId, userHash, firstName, lastName, phone, avatar, locale, language, appVersion, appBuild, traits, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, installSource, installCampaign, emailOptIn, smsOptIn, pushOptIn, gdprConsent, doNotTrack)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
       distinctId,
       externalUserId,
+      userHash,
       firstName,
       lastName,
       phone,

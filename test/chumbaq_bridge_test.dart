@@ -146,6 +146,7 @@ void main() {
       final params = IdentifyParams.builder()
           .distinctId('anon-1')
           .externalUserId('user-1')
+          .userHash('ab12')
           .firstName('Jane')
           .lastName('Doe')
           .phone('+15551234567')
@@ -172,6 +173,7 @@ void main() {
 
       expect(dto.distinctId, 'anon-1');
       expect(dto.externalUserId, 'user-1');
+      expect(dto.userHash, 'ab12');
       expect(dto.firstName, 'Jane');
       expect(dto.lastName, 'Doe');
       expect(dto.phone, '+15551234567');

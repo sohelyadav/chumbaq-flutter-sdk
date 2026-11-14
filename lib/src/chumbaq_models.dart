@@ -216,6 +216,7 @@ class IdentifyParamsBuilder {
 
   String? _distinctId;
   String? _externalUserId;
+  String? _userHash;
   String? _firstName;
   String? _lastName;
   String? _phone;
@@ -245,6 +246,14 @@ class IdentifyParamsBuilder {
 
   IdentifyParamsBuilder externalUserId(String v) {
     _externalUserId = v;
+    return this;
+  }
+
+  /// Required with [externalUserId]: HMAC-SHA256 of the external user id under the
+  /// project's identity secret, as hex, made on your own server (never put the secret
+  /// in the app). Without it the server refuses the external id.
+  IdentifyParamsBuilder userHash(String v) {
+    _userHash = v;
     return this;
   }
 
@@ -357,6 +366,7 @@ class IdentifyParamsBuilder {
         pg.IdentifyParamsDto(
           distinctId: _distinctId,
           externalUserId: _externalUserId,
+          userHash: _userHash,
           firstName: _firstName,
           lastName: _lastName,
           phone: _phone,

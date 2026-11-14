@@ -92,6 +92,7 @@ class IdentifyParamsDto {
   IdentifyParamsDto({
     this.distinctId,
     this.externalUserId,
+    this.userHash,
     this.firstName,
     this.lastName,
     this.phone,
@@ -117,6 +118,8 @@ class IdentifyParamsDto {
 
   final String? distinctId;
   final String? externalUserId;
+  /// HMAC-SHA256 of [externalUserId] under the project's identity secret, made server-side.
+  final String? userHash;
   final String? firstName;
   final String? lastName;
   final String? phone;

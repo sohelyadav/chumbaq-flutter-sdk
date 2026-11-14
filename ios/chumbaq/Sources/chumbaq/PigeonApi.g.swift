@@ -152,6 +152,8 @@ struct ChumbaqConfigDto {
 struct IdentifyParamsDto {
   var distinctId: String? = nil
   var externalUserId: String? = nil
+  /// HMAC-SHA256 of [externalUserId] under the project's identity secret, made server-side.
+  var userHash: String? = nil
   var firstName: String? = nil
   var lastName: String? = nil
   var phone: String? = nil
@@ -179,31 +181,33 @@ struct IdentifyParamsDto {
   static func fromList(_ pigeonVar_list: [Any?]) -> IdentifyParamsDto? {
     let distinctId: String? = nilOrValue(pigeonVar_list[0])
     let externalUserId: String? = nilOrValue(pigeonVar_list[1])
-    let firstName: String? = nilOrValue(pigeonVar_list[2])
-    let lastName: String? = nilOrValue(pigeonVar_list[3])
-    let phone: String? = nilOrValue(pigeonVar_list[4])
-    let avatar: String? = nilOrValue(pigeonVar_list[5])
-    let locale: String? = nilOrValue(pigeonVar_list[6])
-    let language: String? = nilOrValue(pigeonVar_list[7])
-    let appVersion: String? = nilOrValue(pigeonVar_list[8])
-    let appBuild: String? = nilOrValue(pigeonVar_list[9])
-    let traits: [String?: Any?]? = nilOrValue(pigeonVar_list[10])
-    let utmSource: String? = nilOrValue(pigeonVar_list[11])
-    let utmMedium: String? = nilOrValue(pigeonVar_list[12])
-    let utmCampaign: String? = nilOrValue(pigeonVar_list[13])
-    let utmContent: String? = nilOrValue(pigeonVar_list[14])
-    let utmTerm: String? = nilOrValue(pigeonVar_list[15])
-    let installSource: String? = nilOrValue(pigeonVar_list[16])
-    let installCampaign: String? = nilOrValue(pigeonVar_list[17])
-    let emailOptIn: Bool? = nilOrValue(pigeonVar_list[18])
-    let smsOptIn: Bool? = nilOrValue(pigeonVar_list[19])
-    let pushOptIn: Bool? = nilOrValue(pigeonVar_list[20])
-    let gdprConsent: Bool? = nilOrValue(pigeonVar_list[21])
-    let doNotTrack: Bool? = nilOrValue(pigeonVar_list[22])
+    let userHash: String? = nilOrValue(pigeonVar_list[2])
+    let firstName: String? = nilOrValue(pigeonVar_list[3])
+    let lastName: String? = nilOrValue(pigeonVar_list[4])
+    let phone: String? = nilOrValue(pigeonVar_list[5])
+    let avatar: String? = nilOrValue(pigeonVar_list[6])
+    let locale: String? = nilOrValue(pigeonVar_list[7])
+    let language: String? = nilOrValue(pigeonVar_list[8])
+    let appVersion: String? = nilOrValue(pigeonVar_list[9])
+    let appBuild: String? = nilOrValue(pigeonVar_list[10])
+    let traits: [String?: Any?]? = nilOrValue(pigeonVar_list[11])
+    let utmSource: String? = nilOrValue(pigeonVar_list[12])
+    let utmMedium: String? = nilOrValue(pigeonVar_list[13])
+    let utmCampaign: String? = nilOrValue(pigeonVar_list[14])
+    let utmContent: String? = nilOrValue(pigeonVar_list[15])
+    let utmTerm: String? = nilOrValue(pigeonVar_list[16])
+    let installSource: String? = nilOrValue(pigeonVar_list[17])
+    let installCampaign: String? = nilOrValue(pigeonVar_list[18])
+    let emailOptIn: Bool? = nilOrValue(pigeonVar_list[19])
+    let smsOptIn: Bool? = nilOrValue(pigeonVar_list[20])
+    let pushOptIn: Bool? = nilOrValue(pigeonVar_list[21])
+    let gdprConsent: Bool? = nilOrValue(pigeonVar_list[22])
+    let doNotTrack: Bool? = nilOrValue(pigeonVar_list[23])
 
     return IdentifyParamsDto(
       distinctId: distinctId,
       externalUserId: externalUserId,
+      userHash: userHash,
       firstName: firstName,
       lastName: lastName,
       phone: phone,
@@ -231,6 +235,7 @@ struct IdentifyParamsDto {
     return [
       distinctId,
       externalUserId,
+      userHash,
       firstName,
       lastName,
       phone,

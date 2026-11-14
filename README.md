@@ -146,9 +146,14 @@ final match = await Chumbaq.instance.matchDeferredDeepLink();
 
 // Who this is, once they log in.
 await Chumbaq.instance.identify(
-  IdentifyParams.builder().externalUserId('u_42').build(),
+  IdentifyParams.builder().externalUserId('u_42').userHash(hashFromYourServer).build(),
 );
 ```
+
+An external user id must come with a `userHash`: HMAC-SHA256 of the id under your
+project's identity secret (API keys page), made on **your server**, never in the app.
+Without it the server refuses the identify, so nobody holding your app's key can claim
+to be one of your users.
 
 ## In-app messages
 
@@ -328,6 +333,7 @@ the server.
 await Chumbaq.instance.identify(
   IdentifyParams.builder()
       .externalUserId('u_42')
+      .userHash(hashFromYourServer)
       .pushOptIn(false)   // no push to this device
       .emailOptIn(true)
       .smsOptIn(false)

@@ -76,7 +76,8 @@ dependencies {
     // here can still resolve on a machine with an old artifact in ~/.m2, so
     // the build silently compiles against an outdated copy of the SDK while
     // a clean checkout just fails to resolve.
-    val chumbaqSdkVersion = "0.1.0"
+    // 0.2.0: identify takes a userHash (identity verification).
+    val chumbaqSdkVersion = "0.2.0"
     api("com.chumbaq:chumbaq-core:$chumbaqSdkVersion")
     api("com.chumbaq:chumbaq-push:$chumbaqSdkVersion")
     api("com.chumbaq:chumbaq-banners:$chumbaqSdkVersion")
