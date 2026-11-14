@@ -817,6 +817,7 @@ extension IdentifyParamsDto {
     if let installCampaign { b.installCampaign(installCampaign) }
     if let emailOptIn { b.emailOptIn(emailOptIn) }
     if let smsOptIn { b.smsOptIn(smsOptIn) }
+    if let whatsappOptIn { b.whatsappOptIn(whatsappOptIn) }
     if let pushOptIn { b.pushOptIn(pushOptIn) }
     if let gdprConsent { b.gdprConsent(gdprConsent) }
     if let doNotTrack { b.doNotTrack(doNotTrack) }

@@ -1,3 +1,9 @@
+## Unreleased
+
+- `IdentifyParams` gains `whatsappOptIn`, sent on identify. Needs a native SDK
+  release that has it: raise the pins in `android/build.gradle.kts` and
+  `ios/chumbaq/Package.swift` to match before publishing.
+
 ## 0.2.0
 
 ### Verified identity — breaking

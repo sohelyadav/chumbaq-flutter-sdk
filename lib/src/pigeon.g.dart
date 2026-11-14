@@ -132,6 +132,7 @@ class IdentifyParamsDto {
     this.installCampaign,
     this.emailOptIn,
     this.smsOptIn,
+    this.whatsappOptIn,
     this.pushOptIn,
     this.gdprConsent,
     this.doNotTrack,
@@ -180,6 +181,8 @@ class IdentifyParamsDto {
 
   bool? smsOptIn;
 
+  bool? whatsappOptIn;
+
   bool? pushOptIn;
 
   bool? gdprConsent;
@@ -209,6 +212,7 @@ class IdentifyParamsDto {
       installCampaign,
       emailOptIn,
       smsOptIn,
+      whatsappOptIn,
       pushOptIn,
       gdprConsent,
       doNotTrack,
@@ -239,9 +243,10 @@ class IdentifyParamsDto {
       installCampaign: result[18] as String?,
       emailOptIn: result[19] as bool?,
       smsOptIn: result[20] as bool?,
-      pushOptIn: result[21] as bool?,
-      gdprConsent: result[22] as bool?,
-      doNotTrack: result[23] as bool?,
+      whatsappOptIn: result[21] as bool?,
+      pushOptIn: result[22] as bool?,
+      gdprConsent: result[23] as bool?,
+      doNotTrack: result[24] as bool?,
     );
   }
 }
