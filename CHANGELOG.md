@@ -1,3 +1,16 @@
+## 0.2.0
+
+### Verified identity — breaking
+
+* `IdentifyParams` takes a `userHash`, sent with `externalUserId` on
+  `identify`. The server now refuses
+  an external user id without it (401). The hash is HMAC-SHA256 of the
+  external user id under the project's identity secret (API keys page in the
+  dashboard), computed on your own server and handed to the app; never put
+  the secret in an app.
+* Builds against the native SDKs 0.2.0: `com.chumbaq:*:0.2.0` on Android and
+  `chumbaq-ios-sdk` 0.2.0 on iOS, which send the hash.
+
 ## 0.1.0
 
 First release. A Flutter wrapper over the native Chumbaq SDKs — the

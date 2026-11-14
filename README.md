@@ -124,7 +124,7 @@ func application(
 
 ```yaml
 dependencies:
-  chumbaq: ^0.1.0
+  chumbaq: ^0.2.0
 ```
 
 ## Getting started
