@@ -1,5 +1,5 @@
 group = "com.chumbaq.chumbaq"
-version = "0.2.0"
+version = "0.2.1"
 
 buildscript {
     val kotlinVersion = "2.2.20"
@@ -77,7 +77,9 @@ dependencies {
     // the build silently compiles against an outdated copy of the SDK while
     // a clean checkout just fails to resolve.
     // 0.2.0: identify takes a userHash (identity verification).
-    val chumbaqSdkVersion = "0.2.0"
+    // 0.2.2: identify sends whatsappOptIn; push token registration survives a
+    // rotation and retries a 404 (Android 0.2.1 was never published).
+    val chumbaqSdkVersion = "0.2.2"
     api("com.chumbaq:chumbaq-core:$chumbaqSdkVersion")
     api("com.chumbaq:chumbaq-push:$chumbaqSdkVersion")
     api("com.chumbaq:chumbaq-banners:$chumbaqSdkVersion")

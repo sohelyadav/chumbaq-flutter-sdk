@@ -40,7 +40,7 @@ let package = Package(
     // ("chumbaq-ios-sdk"), and naming it "Chumbaq" as well would alias a
     // second identity onto the same package, which collides with this
     // package's own identity once Flutter symlinks it into the host app.
-    .package(url: "https://github.com/sohelyadav/chumbaq-ios-sdk.git", from: "0.2.0"),
+    .package(url: "https://github.com/sohelyadav/chumbaq-ios-sdk.git", from: "0.2.1"),
   ],
   targets: [
     .target(

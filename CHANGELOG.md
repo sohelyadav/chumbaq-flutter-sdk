@@ -1,8 +1,12 @@
-## Unreleased
+## 0.2.1
 
-- `IdentifyParams` gains `whatsappOptIn`, sent on identify. Needs a native SDK
-  release that has it: raise the pins in `android/build.gradle.kts` and
-  `ios/chumbaq/Package.swift` to match before publishing.
+* `IdentifyParams` gains `whatsappOptIn`, sent on `identify`: the person's
+  consent to WhatsApp messages, apart from SMS.
+* Builds against `com.chumbaq:*:0.2.2` on Android and `chumbaq-ios-sdk` 0.2.1
+  on iOS, which send it.
+* Android: the push token reaches the server reliably. Android 0.2.2 retries a
+  token registration that ran before the device was known (a 404) and keeps a
+  newer token from being overwritten by an older one.
 
 ## 0.2.0
 
