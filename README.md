@@ -20,7 +20,7 @@ flutter pub add chumbaq
 - Android: add your app to a Firebase project, put its `google-services.json`
   in `android/app/`, and apply the `com.google.gms.google-services` Gradle
   plugin. Upload that Firebase project's service account key in the Chumbaq
-  dashboard.
+  dashboard under Push Notifications → Settings.
 - iOS: add the Push Notifications capability in Xcode and follow
   [iOS setup](#ios-setup) (Swift Package Manager, APNs token).
 
@@ -45,8 +45,8 @@ has reached Chumbaq.
 `externalUserId` and a `userHash` made on your server. See
 [Getting started](#getting-started) for the call and how to make the hash.
 
-**5. Send a test push.** In the dashboard, open Push settings → Test send and
-send to the device. If nothing arrives, turn on [diagnostics](#diagnostics).
+**5. Send a test push.** In the dashboard, open Push Notifications → Settings
+tab → Test send and send to the device. If nothing arrives, turn on [diagnostics](#diagnostics).
 
 ## Platform support
 
