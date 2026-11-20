@@ -3,6 +3,51 @@
 Deep linking, deferred deep links, events, in-app messages,
 banners, and push notifications for Chumbaq.
 
+## First push in 10 minutes
+
+For a Flutter app that has never used Chumbaq. Android is the full path today;
+sending to iOS from the dashboard is coming.
+
+**1. Create a project.** In the Chumbaq dashboard, create a project and copy
+its project ID and its SDK (project API) key.
+
+**2. Add the package and Firebase.**
+
+```sh
+flutter pub add chumbaq
+```
+
+- Android: add your app to a Firebase project, put its `google-services.json`
+  in `android/app/`, and apply the `com.google.gms.google-services` Gradle
+  plugin. Upload that Firebase project's service account key in the Chumbaq
+  dashboard.
+- iOS: add the Push Notifications capability in Xcode and follow
+  [iOS setup](#ios-setup) (Swift Package Manager, APNs token).
+
+**3. Initialise the SDK and push.**
+
+```dart
+await Chumbaq.instance.init(ChumbaqConfig.builder(
+  baseUrl: 'https://your-chumbaq-host',
+  apiKey: '<SDK key>',
+  projectId: '<project id>',
+).build());
+await ChumbaqPush.instance.init(); // Android: fetches and registers the FCM token
+```
+
+The SDK does not ask for notification permission; your app does. On Android
+13+ declare `android.permission.POST_NOTIFICATIONS` in the manifest and
+request it at runtime, as `example/android/app/src/main/kotlin/com/chumbaq/chumbaq_example/MainActivity.kt`
+does. `await ChumbaqPush.instance.isRegistered` turns `true` once the token
+has reached Chumbaq.
+
+**4. Identify the user.** Call `Chumbaq.instance.identify` with
+`externalUserId` and a `userHash` made on your server. See
+[Getting started](#getting-started) for the call and how to make the hash.
+
+**5. Send a test push.** In the dashboard, open Push settings → Test send and
+send to the device. If nothing arrives, turn on [diagnostics](#diagnostics).
+
 ## Platform support
 
 Android and iOS. The plugin pulls in the published native SDKs — from Maven
