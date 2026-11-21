@@ -224,6 +224,17 @@ This SDK never intercepts a message. Firebase Messaging on Android, and APNs
 on iOS, are the app's; the SDK reports whatever the app hands it. On iOS that
 includes the device token itself — see [iOS setup](#ios-setup).
 
+Before push works, each platform needs its own setup:
+
+- Android: put your Firebase project's `google-services.json` in
+  `android/app/` and apply the `com.google.gms.google-services` Gradle plugin.
+  Without them Firebase never issues a token. Upload the same project's service
+  account key in the Chumbaq dashboard under Push Notifications → Settings.
+- iOS: add the Push Notifications capability in Xcode, and give your Chumbaq
+  project an APNs auth key (the `.p8` file, its key id, your team id and the
+  app's bundle id). The dashboard has no form for APNs yet: send them to
+  `POST /push-notifications/channels/credentials` with provider `apns`.
+
 ```dart
 await ChumbaqPush.instance.init();
 
