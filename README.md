@@ -169,7 +169,7 @@ func application(
 
 ```yaml
 dependencies:
-  chumbaq: ^0.2.0
+  chumbaq: ^0.2.1
 ```
 
 ## Getting started
@@ -393,6 +393,7 @@ await Chumbaq.instance.identify(
       .pushOptIn(false)   // no push to this device
       .emailOptIn(true)
       .smsOptIn(false)
+      .whatsappOptIn(false)
       .doNotTrack(true)   // stop storing behavioural data from this device
       .build(),
 );

@@ -111,6 +111,7 @@ class IdentifyParamsDto {
     this.installCampaign,
     this.emailOptIn,
     this.smsOptIn,
+    this.whatsappOptIn,
     this.pushOptIn,
     this.gdprConsent,
     this.doNotTrack,
@@ -138,6 +139,7 @@ class IdentifyParamsDto {
   final String? installCampaign;
   final bool? emailOptIn;
   final bool? smsOptIn;
+  final bool? whatsappOptIn;
   final bool? pushOptIn;
   final bool? gdprConsent;
   final bool? doNotTrack;

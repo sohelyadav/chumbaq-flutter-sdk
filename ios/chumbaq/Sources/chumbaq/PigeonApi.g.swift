@@ -172,6 +172,7 @@ struct IdentifyParamsDto {
   var installCampaign: String? = nil
   var emailOptIn: Bool? = nil
   var smsOptIn: Bool? = nil
+  var whatsappOptIn: Bool? = nil
   var pushOptIn: Bool? = nil
   var gdprConsent: Bool? = nil
   var doNotTrack: Bool? = nil
@@ -200,9 +201,10 @@ struct IdentifyParamsDto {
     let installCampaign: String? = nilOrValue(pigeonVar_list[18])
     let emailOptIn: Bool? = nilOrValue(pigeonVar_list[19])
     let smsOptIn: Bool? = nilOrValue(pigeonVar_list[20])
-    let pushOptIn: Bool? = nilOrValue(pigeonVar_list[21])
-    let gdprConsent: Bool? = nilOrValue(pigeonVar_list[22])
-    let doNotTrack: Bool? = nilOrValue(pigeonVar_list[23])
+    let whatsappOptIn: Bool? = nilOrValue(pigeonVar_list[21])
+    let pushOptIn: Bool? = nilOrValue(pigeonVar_list[22])
+    let gdprConsent: Bool? = nilOrValue(pigeonVar_list[23])
+    let doNotTrack: Bool? = nilOrValue(pigeonVar_list[24])
 
     return IdentifyParamsDto(
       distinctId: distinctId,
@@ -226,6 +228,7 @@ struct IdentifyParamsDto {
       installCampaign: installCampaign,
       emailOptIn: emailOptIn,
       smsOptIn: smsOptIn,
+      whatsappOptIn: whatsappOptIn,
       pushOptIn: pushOptIn,
       gdprConsent: gdprConsent,
       doNotTrack: doNotTrack
@@ -254,6 +257,7 @@ struct IdentifyParamsDto {
       installCampaign,
       emailOptIn,
       smsOptIn,
+      whatsappOptIn,
       pushOptIn,
       gdprConsent,
       doNotTrack,

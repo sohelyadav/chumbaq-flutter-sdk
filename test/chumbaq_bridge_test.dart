@@ -165,6 +165,7 @@ void main() {
           .installCampaign('launch')
           .emailOptIn(true)
           .smsOptIn(false)
+          .whatsappOptIn(false)
           .pushOptIn(true)
           .gdprConsent(true)
           .doNotTrack(false)
@@ -182,6 +183,7 @@ void main() {
       expect(dto.utmSource, 'google');
       expect(dto.emailOptIn, isTrue);
       expect(dto.smsOptIn, isFalse);
+      expect(dto.whatsappOptIn, isFalse);
       expect(dto.pushOptIn, isTrue);
       expect(dto.gdprConsent, isTrue);
       expect(dto.doNotTrack, isFalse);

@@ -461,6 +461,7 @@ private fun IdentifyParamsDto.toNativeParams(): IdentifyParams {
     installCampaign?.let { b.installCampaign(it) }
     emailOptIn?.let { b.emailOptIn(it) }
     smsOptIn?.let { b.smsOptIn(it) }
+    whatsappOptIn?.let { b.whatsappOptIn(it) }
     pushOptIn?.let { b.pushOptIn(it) }
     gdprConsent?.let { b.gdprConsent(it) }
     doNotTrack?.let { b.doNotTrack(it) }

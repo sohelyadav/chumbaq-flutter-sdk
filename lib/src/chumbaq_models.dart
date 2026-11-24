@@ -235,6 +235,7 @@ class IdentifyParamsBuilder {
   String? _installCampaign;
   bool? _emailOptIn;
   bool? _smsOptIn;
+  bool? _whatsappOptIn;
   bool? _pushOptIn;
   bool? _gdprConsent;
   bool? _doNotTrack;
@@ -347,6 +348,11 @@ class IdentifyParamsBuilder {
     return this;
   }
 
+  IdentifyParamsBuilder whatsappOptIn(bool v) {
+    _whatsappOptIn = v;
+    return this;
+  }
+
   IdentifyParamsBuilder pushOptIn(bool v) {
     _pushOptIn = v;
     return this;
@@ -385,6 +391,7 @@ class IdentifyParamsBuilder {
           installCampaign: _installCampaign,
           emailOptIn: _emailOptIn,
           smsOptIn: _smsOptIn,
+          whatsappOptIn: _whatsappOptIn,
           pushOptIn: _pushOptIn,
           gdprConsent: _gdprConsent,
           doNotTrack: _doNotTrack,

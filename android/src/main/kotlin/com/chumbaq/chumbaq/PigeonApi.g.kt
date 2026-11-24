@@ -151,6 +151,7 @@ data class IdentifyParamsDto (
   val installCampaign: String? = null,
   val emailOptIn: Boolean? = null,
   val smsOptIn: Boolean? = null,
+  val whatsappOptIn: Boolean? = null,
   val pushOptIn: Boolean? = null,
   val gdprConsent: Boolean? = null,
   val doNotTrack: Boolean? = null
@@ -179,10 +180,11 @@ data class IdentifyParamsDto (
       val installCampaign = pigeonVar_list[18] as String?
       val emailOptIn = pigeonVar_list[19] as Boolean?
       val smsOptIn = pigeonVar_list[20] as Boolean?
-      val pushOptIn = pigeonVar_list[21] as Boolean?
-      val gdprConsent = pigeonVar_list[22] as Boolean?
-      val doNotTrack = pigeonVar_list[23] as Boolean?
-      return IdentifyParamsDto(distinctId, externalUserId, userHash, firstName, lastName, phone, avatar, locale, language, appVersion, appBuild, traits, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, installSource, installCampaign, emailOptIn, smsOptIn, pushOptIn, gdprConsent, doNotTrack)
+      val whatsappOptIn = pigeonVar_list[21] as Boolean?
+      val pushOptIn = pigeonVar_list[22] as Boolean?
+      val gdprConsent = pigeonVar_list[23] as Boolean?
+      val doNotTrack = pigeonVar_list[24] as Boolean?
+      return IdentifyParamsDto(distinctId, externalUserId, userHash, firstName, lastName, phone, avatar, locale, language, appVersion, appBuild, traits, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, installSource, installCampaign, emailOptIn, smsOptIn, whatsappOptIn, pushOptIn, gdprConsent, doNotTrack)
     }
   }
   fun toList(): List<Any?> {
@@ -208,6 +210,7 @@ data class IdentifyParamsDto (
       installCampaign,
       emailOptIn,
       smsOptIn,
+      whatsappOptIn,
       pushOptIn,
       gdprConsent,
       doNotTrack,
